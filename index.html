@@ -100,6 +100,12 @@ body{background:#0a0a0f;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Se
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px}
 ::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.18)}
 
+/* Help tooltip */
+.help-icon{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:rgba(255,255,255,0.08);color:#6b6b80;font-size:9px;font-weight:600;cursor:pointer;position:relative;vertical-align:middle;margin-left:4px;transition:all 0.2s ease;line-height:1}
+.help-icon:hover{background:rgba(96,165,250,0.2);color:#60a5fa}
+.help-tooltip{display:none;position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:rgba(20,20,35,0.97);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:12px 14px;font-size:11px;font-weight:400;color:#a0a0b8;white-space:normal;width:240px;line-height:1.6;box-shadow:0 8px 24px rgba(0,0,0,0.4);z-index:10;text-transform:none;letter-spacing:0}
+.help-tooltip.show{display:block}
+
 /* Inline filter rows */
 .filter-row-inline{display:flex;align-items:center;gap:12px;margin-bottom:10px}
 .filter-inline-label{font-size:12px;font-weight:500;color:#6b6b80;min-width:56px;white-space:nowrap}
@@ -142,7 +148,7 @@ body{background:#0a0a0f;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Se
       <div class="sc-sub" id="sc-cycle-sub">이전 6개월 대비 <span class="up">▲ 0.8일 단축</span></div>
     </div>
     <div class="sc">
-      <div class="sc-label" id="sc-ret-label">재구매율</div>
+      <div class="sc-label" id="sc-ret-label">재구매율 <span class="help-icon" onclick="toggleHelp(event)">?<span class="help-tooltip">조회 기간 내 2회 이상 구매한 고객의 비율입니다.<br>재구매율 = 재구매 고객 수 / 전체 구매 고객 수 × 100</span></span></div>
       <div class="sc-value" id="sc-ret-val">38.4%</div>
       <div class="sc-sub" id="sc-ret-sub">이전 6개월 대비 <span class="up">▲ 2.1%p 상승</span></div>
     </div>
@@ -220,10 +226,10 @@ body{background:#0a0a0f;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Se
     </div>
   </div>
 
-  <!-- 세그먼트별 재구매율 추이 비교 -->
+  <!-- 세그먼트별 W1 리텐션 추이 비교 -->
   <div class="card">
-    <div class="ct">세그먼트별 리텐션 추이 비교</div>
-    <div class="cs" id="seg-sub">월 기준 · 4주 재구매율 · 최근 6개월</div>
+    <div class="ct">세그먼트별 W1 리텐션 추이 비교</div>
+    <div class="cs" id="seg-sub">코호트 기준 · W1(첫 주) 재구매율 · 최근 6개월</div>
     <div class="sub-tabs" id="stabs-seg-trend">
       <button class="stab active" onclick="swSub('seg-trend','order',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>주문 리텐션</button>
       <button class="stab" onclick="swSub('seg-trend','visit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>방문 리텐션</button>
@@ -310,8 +316,8 @@ var COHORT_DATA={
   'churn-visit':[{label:'1월 윈백',vals:[35,28,23,19,15,12]},{label:'2월 윈백',vals:[36,29,24,20,16,null]},{label:'3월 윈백',vals:[37,30,25,21,null,null]},{label:'4월 윈백',vals:[34,27,22,null,null,null]}]
 };
 var PERIOD={
-  6:{badge:'2025년 1–6월',mosuSub:'이전 6개월 98,240명 / <span class="up">▲ +14.1%</span>',cycleSub:'이전 6개월 대비 <span class="up">▲ 0.8일 단축</span>',retVal:'38.4%',retSub:'이전 6개월 대비 <span class="up">▲ 2.1%p 상승</span>',cycleValVisit:'3.2일',cycleSubVisit:'이전 6개월 대비 <span class="up">▲ 0.3일 단축</span>',retValVisit:'54.7%',retSubVisit:'이전 6개월 대비 <span class="up">▲ 1.8%p 상승</span>',months:['1월','2월','3월','4월','5월','6월'],pop:{active:[80100,82400,84000,85500,86900,89240],churn:[44500,43800,43100,42500,41700,41520],new:[22300,23000,23800,24100,24400,24810]},seg:{new:[24.1,25.3,25.9,27.0,27.4,28.1],active:[44.2,45.1,46.0,46.8,47.0,47.3],churn:[16.1,16.9,17.4,18.1,18.2,18.6]},segVisit:{new:[41.2,42.5,43.1,44.3,44.8,45.5],active:[61.0,62.1,63.0,63.8,64.0,64.3],churn:[30.5,31.2,31.8,32.4,32.6,33.0]}},
-  12:{badge:'2024년 7월–2025년 6월',mosuSub:'이전 12개월 81,400명 / <span class="up">▲ +37.7%</span>',cycleSub:'이전 12개월 대비 <span class="up">▲ 1.4일 단축</span>',retVal:'35.8%',retSub:'이전 12개월 대비 <span class="up">▲ 3.4%p 상승</span>',cycleValVisit:'3.5일',cycleSubVisit:'이전 12개월 대비 <span class="up">▲ 0.5일 단축</span>',retValVisit:'52.1%',retSubVisit:'이전 12개월 대비 <span class="up">▲ 2.9%p 상승</span>',months:['7월','8월','9월','10월','11월','12월','1월','2월','3월','4월','5월','6월'],pop:{active:[60000,63000,66000,69000,72000,76000,80000,84000,86000,87000,88000,89240],churn:[54000,52000,50000,48000,46000,44000,43000,42500,42100,41800,41600,41520],new:[12000,14000,16000,18000,20000,22000,23000,24000,24400,24600,24700,24810]},seg:{new:[20.0,21.2,22.5,23.0,24.1,25.3,25.9,27.0,27.4,27.8,28.0,28.1],active:[40.0,41.5,42.8,43.5,44.2,45.1,46.0,46.8,47.0,47.1,47.2,47.3],churn:[13.0,13.8,14.5,15.2,16.1,16.9,17.4,18.1,18.2,18.4,18.5,18.6]},segVisit:{new:[36.0,37.5,38.8,39.5,41.2,42.5,43.1,44.3,44.8,45.0,45.2,45.5],active:[56.0,57.5,58.8,59.5,61.0,62.1,63.0,63.8,64.0,64.1,64.2,64.3],churn:[26.0,27.2,28.0,29.0,30.5,31.2,31.8,32.4,32.6,32.8,32.9,33.0]}}
+  6:{badge:'2025년 1–6월',mosuSub:'이전 6개월 98,240명 / <span class="up">▲ +14.1%</span>',cycleSub:'이전 6개월 대비 <span class="up">▲ 0.8일 단축</span>',retVal:'38.4%',retSub:'이전 6개월 대비 <span class="up">▲ 2.1%p 상승</span>',cycleValVisit:'3.2일',cycleSubVisit:'이전 6개월 대비 <span class="up">▲ 0.3일 단축</span>',retValVisit:'54.7%',retSubVisit:'이전 6개월 대비 <span class="up">▲ 1.8%p 상승</span>',months:['1월','2월','3월','4월','5월','6월'],pop:{active:[80100,82400,84000,85500,86900,89240],churn:[44500,43800,43100,42500,41700,41520],new:[22300,23000,23800,24100,24400,24810]},seg:{new:[28,30,32,29,null,null],active:[55,57,59,56,null,null],churn:[19,20,21,18,null,null]},segVisit:{new:[45,47,49,46,null,null],active:[72,74,76,73,null,null],churn:[35,36,37,34,null,null]}},
+  12:{badge:'2024년 7월–2025년 6월',mosuSub:'이전 12개월 81,400명 / <span class="up">▲ +37.7%</span>',cycleSub:'이전 12개월 대비 <span class="up">▲ 1.4일 단축</span>',retVal:'35.8%',retSub:'이전 12개월 대비 <span class="up">▲ 3.4%p 상승</span>',cycleValVisit:'3.5일',cycleSubVisit:'이전 12개월 대비 <span class="up">▲ 0.5일 단축</span>',retValVisit:'52.1%',retSubVisit:'이전 12개월 대비 <span class="up">▲ 2.9%p 상승</span>',months:['7월','8월','9월','10월','11월','12월','1월','2월','3월','4월','5월','6월'],pop:{active:[60000,63000,66000,69000,72000,76000,80000,84000,86000,87000,88000,89240],churn:[54000,52000,50000,48000,46000,44000,43000,42500,42100,41800,41600,41520],new:[12000,14000,16000,18000,20000,22000,23000,24000,24400,24600,24700,24810]},seg:{new:[22,23,25,26,27,28,30,32,29,null,null,null],active:[48,49,51,52,53,55,57,59,56,null,null,null],churn:[14,15,16,17,18,19,20,21,18,null,null,null]},segVisit:{new:[38,39,41,42,43,45,47,49,46,null,null,null],active:[64,66,67,69,70,72,74,76,73,null,null,null],churn:[28,29,31,32,33,35,36,37,34,null,null,null]}}
 };
 var COHORT_SEG_DAY={
   act:[{label:'1월 활성',vals:[58,50,45,41,36,32]},{label:'2월 활성',vals:[60,52,47,43,38,null]},{label:'3월 활성',vals:[62,54,49,45,null,null]},{label:'4월 활성',vals:[59,51,46,null,null,null]}],
@@ -321,6 +327,7 @@ var COHORT_SEG_DAY={
 var cohortSeg='act',cohortType='week';
 var COHORT_NOTICES={new:'첫 주문 전환은 제외 · 재구매부터 측정',churn:'윈백 캠페인 전환 유저 기준 · 재이탈 여부 추적'};
 var COHORT_PALETTES={act:'green',new:'blue',churn:'coral'};
+function toggleHelp(e){e.stopPropagation();var tip=e.currentTarget.querySelector('.help-tooltip');tip.classList.toggle('show');document.addEventListener('click',function h(){tip.classList.remove('show');document.removeEventListener('click',h);});}
 Chart.defaults.color='#6b6b80';
 Chart.defaults.borderColor='rgba(255,255,255,0.05)';
 var tooltipStyle={backgroundColor:'rgba(20,20,30,0.95)',titleColor:'#fff',bodyColor:'#a0a0b8',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,cornerRadius:10,padding:12,mode:'index'};
@@ -394,7 +401,7 @@ function drawSubContent(group,mode){
   }
   if(group==='seg-trend'){
     if(!charts['c-seg-visit']){
-      charts['c-seg-visit']=new Chart(document.getElementById('c-seg-visit'),{type:'line',data:{labels:p.months,datasets:[{label:'0회 출신',data:p.segVisit.new,borderColor:'#60a5fa',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#60a5fa',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},{label:'활성패써',data:p.segVisit.active,borderColor:'#34d399',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#34d399',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},{label:'이탈패써(윈백 후)',data:p.segVisit.churn,borderColor:'#fb923c',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#fb923c',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5,borderDash:[4,3]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:tooltipStyle},scales:{x:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'}}},y:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'},callback:function(v){return v+'%'}},min:20,max:70}}}});
+      charts['c-seg-visit']=new Chart(document.getElementById('c-seg-visit'),{type:'line',data:{labels:p.months,datasets:[{label:'0회 출신',data:p.segVisit.new,borderColor:'#60a5fa',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#60a5fa',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},{label:'활성패써',data:p.segVisit.active,borderColor:'#34d399',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#34d399',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},{label:'이탈패써(윈백 후)',data:p.segVisit.churn,borderColor:'#fb923c',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#fb923c',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5,borderDash:[4,3]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:Object.assign({},tooltipStyle,{callbacks:{label:function(c){return c.dataset.label+(c.parsed.y!==null?': '+c.parsed.y+'%':'');}}})},scales:{x:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'}}},y:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'},callback:function(v){return v+'%'}},min:0,max:80}}}});
     }
   }
 }
@@ -406,7 +413,7 @@ function setPeriod(el,months){
   document.getElementById('period-badge').textContent=p.badge;
   document.getElementById('matrix-sub').textContent='첫 구매월 기준 · 최근 '+months+'개월 코호트';
   document.getElementById('pop-sub').textContent='월 기준 · 최근 '+months+'개월';
-  document.getElementById('seg-sub').textContent='월 기준 · 4주 재구매율 · 최근 '+months+'개월';
+  document.getElementById('seg-sub').textContent='코호트 기준 · W1(첫 주) 재구매율 · 최근 '+months+'개월';
   document.getElementById('sc-mosu-sub').innerHTML=p.mosuSub;
   document.getElementById('sc-cycle-sub').innerHTML=p.cycleSub;
   document.getElementById('sc-ret-val').textContent=p.retVal;
@@ -562,7 +569,7 @@ function draw(tab){
     }
     renderCohortUnified();
     if(!charts['c-seg']){
-      charts['c-seg']=new Chart(document.getElementById('c-seg'),{type:'line',data:{labels:p.months,datasets:[{label:'0회 출신',data:p.seg.new,borderColor:'#60a5fa',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#60a5fa',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},{label:'활성패써',data:p.seg.active,borderColor:'#34d399',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#34d399',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},{label:'이탈패써(윈백 후)',data:p.seg.churn,borderColor:'#fb923c',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#fb923c',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5,borderDash:[4,3]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:tooltipStyle},scales:{x:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'}}},y:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'},callback:function(v){return v+'%'}},min:10,max:55}}}});
+      charts['c-seg']=new Chart(document.getElementById('c-seg'),{type:'line',data:{labels:p.months,datasets:[{label:'0회 출신',data:p.seg.new,borderColor:'#60a5fa',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#60a5fa',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},{label:'활성패써',data:p.seg.active,borderColor:'#34d399',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#34d399',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},{label:'이탈패써(윈백 후)',data:p.seg.churn,borderColor:'#fb923c',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#fb923c',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5,borderDash:[4,3]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:Object.assign({},tooltipStyle,{callbacks:{label:function(c){return c.dataset.label+(c.parsed.y!==null?': '+c.parsed.y+'%':'');}}})},scales:{x:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'}}},y:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'},callback:function(v){return v+'%'}},min:0,max:80}}}});
     }
   }
 }
