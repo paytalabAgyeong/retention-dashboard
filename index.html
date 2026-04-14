@@ -74,6 +74,12 @@ body{background:#0a0a0f;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Se
 /* Divider */
 .divider{border:none;border-top:1px solid rgba(255,255,255,0.06);margin:20px 0}
 
+/* N-day chips */
+.nday-chips{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.nday-chip{font-size:11px;font-weight:600;padding:6px 14px;border-radius:8px;background:rgba(167,139,250,0.1);color:#a78bfa;border:1px solid rgba(167,139,250,0.2);display:flex;flex-direction:column;align-items:center;gap:2px;min-width:72px}
+.nday-chip-day{font-size:10px;color:#6b6b80;font-weight:400}
+.nday-chip-val{font-size:16px;font-weight:700;color:#e8e8ed}
+
 /* Glow effects for summary cards */
 .sc:nth-child(1){box-shadow:0 0 40px rgba(99,140,255,0.04)}
 .sc:nth-child(2){box-shadow:0 0 40px rgba(52,211,153,0.04)}
@@ -138,6 +144,16 @@ body{background:#0a0a0f;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Se
     <div class="cs">가로축: 첫 구매 후 주차 · 세로축: 재구매율 · 선: 각 코호트</div>
     <div style="position:relative;height:240px"><canvas id="c-cohort-all"></canvas></div>
     <div class="legend" id="leg-cohort-all"></div>
+  </div>
+  <div class="card">
+    <div class="ct">N-Day 리텐션</div>
+    <div class="cs">첫 구매 후 경과일 기준 · 전체 유저 평균 재구매율</div>
+    <div class="nday-chips" id="nday-chips"></div>
+    <div style="position:relative;height:240px"><canvas id="c-nday"></canvas></div>
+    <div class="legend">
+      <div class="li"><div class="ldash" style="background:#a78bfa"></div>N-Day 리텐션율</div>
+      <div class="li"><div class="ldash" style="background:rgba(167,139,250,0.3);border-top:2px dashed rgba(167,139,250,0.5)"></div>업계 평균</div>
+    </div>
   </div>
 </div>
 
@@ -212,6 +228,11 @@ var PALETTES={
   green:['#065f46','#059669','#10b981','#34d399','#6ee7b7','#a7f3d0'],
   coral:['#9a3412','#c2410c','#ea580c','#fb923c','#fdba74','#fed7aa']
 };
+var NDAY_DATA={
+  labels:['D1','D3','D7','D14','D21','D30','D60','D90'],
+  vals:[62,51,43,36,31,27,20,16],
+  benchmark:[55,44,35,28,24,20,14,10]
+};
 var COHORT_DATA={
   all:[{label:'1월',vals:[51,43,37,33,28,25]},{label:'2월',vals:[53,45,39,35,30,27]},{label:'3월',vals:[55,47,41,37,32,null]},{label:'4월',vals:[52,44,38,34,null,null]},{label:'5월',vals:[54,46,null,null,null,null]},{label:'6월',vals:[53,null,null,null,null,null]}],
   new:[{label:'1월 신규',vals:[28,22,18,15,12,10]},{label:'2월 신규',vals:[30,24,20,17,14,null]},{label:'3월 신규',vals:[32,26,22,18,null,null]},{label:'4월 신규',vals:[29,23,19,null,null,null]}],
@@ -279,11 +300,29 @@ function sw(el,tab){
   ['all','seg'].forEach(function(t){document.getElementById('tab-'+t).style.display=t===tab?'':'none';});
   setTimeout(function(){draw(tab);},80);
 }
+function buildNday(){
+  if(charts['c-nday'])return;
+  var wrap=document.getElementById('nday-chips');
+  NDAY_DATA.labels.forEach(function(d,i){
+    var chip=document.createElement('div');chip.className='nday-chip';
+    chip.innerHTML='<span class="nday-chip-day">'+d+'</span><span class="nday-chip-val">'+NDAY_DATA.vals[i]+'%</span>';
+    wrap.appendChild(chip);
+  });
+  charts['c-nday']=new Chart(document.getElementById('c-nday'),{
+    type:'line',
+    data:{labels:NDAY_DATA.labels,datasets:[
+      {label:'N-Day 리텐션',data:NDAY_DATA.vals,borderColor:'#a78bfa',backgroundColor:'rgba(167,139,250,0.1)',fill:true,borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#a78bfa',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4},
+      {label:'업계 평균',data:NDAY_DATA.benchmark,borderColor:'rgba(167,139,250,0.3)',backgroundColor:'transparent',borderWidth:2,borderDash:[6,4],pointRadius:0,tension:0.4}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(20,20,30,0.95)',titleColor:'#fff',bodyColor:'#a0a0b8',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,cornerRadius:10,padding:12,mode:'index',callbacks:{label:function(c){return c.dataset.label+': '+c.parsed.y+'%';}}}},scales:{x:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'}}},y:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'},callback:function(v){return v+'%'}},min:0,max:80}}}
+  });
+}
 function draw(tab){
   var p=PERIOD[currentPeriod];
   if(tab==='all'){
     makeTbl('tbl-all',[{label:'1월',vals:[null,51,43,37,33,28,25]},{label:'2월',vals:[null,53,45,39,35,30,27]},{label:'3월',vals:[null,55,47,41,37,32,-1]},{label:'4월',vals:[null,52,44,38,34,-1,-1]},{label:'5월',vals:[null,54,46,-1,-1,-1,-1]},{label:'6월',vals:[null,53,-1,-1,-1,-1,-1]}],['W0','W1','W2','W3','W4','W5','W6']);
     buildCohortLine('c-cohort-all','leg-cohort-all',COHORT_DATA.all,'blue');
+    buildNday();
   }
   if(tab==='seg'){
     if(!charts['c-population']){
