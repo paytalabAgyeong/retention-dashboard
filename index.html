@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>리텐션 대시보드</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#F5F5F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1a1a1a;padding:24px}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.page-title{font-size:20px;font-weight:600;color:#1a1a1a}
+.badge{font-size:12px;color:#666;background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:4px 10px;margin-left:10px}
+.filter-tabs{display:flex;gap:4px;background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:4px}
+.ftab{padding:6px 16px;font-size:13px;font-weight:500;border-radius:7px;cursor:pointer;border:none;background:transparent;color:#666}
+.ftab.active{background:#f0f0ee;color:#1a1a1a;border:1px solid #d0d0d0}
+.tabs{display:flex;gap:4px;margin-bottom:20px;background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:4px;width:fit-content}
+.tab{padding:8px 18px;font-size:13px;font-weight:500;border-radius:7px;cursor:pointer;border:none;background:transparent;color:#666}
+.tab.active{background:#f0f0ee;color:#1a1a1a;border:1px solid #d0d0d0}
+.summary-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.sc{background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:20px 22px}
+.sc-label{font-size:13px;font-weight:500;color:#1a1a1a;margin-bottom:14px}
+.sc-value{font-size:34px;font-weight:600;color:#1a1a1a;margin-bottom:10px;line-height:1}
+.sc-sub{font-size:12px;color:#888}
+.up{color:#2d6a1f}.dn{color:#9b2020}
+.card{background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:18px;margin-bottom:12px}
+.card:last-child{margin-bottom:0}
+.ct{font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:4px}
+.cs{font-size:12px;color:#888;margin-bottom:14px}
+.card-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px}
+.notice{font-size:12px;color:#666;background:#f5f8ff;padding:7px 12px;margin-bottom:12px;border-left:2px solid #4a8fd4}
+.legend{display:flex;gap:14px;margin-top:12px;flex-wrap:wrap}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:#888}
+.ld{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ldash{width:16px;height:2px;flex-shrink:0;border-radius:1px}
+.cohort-wrap{overflow-x:auto}
+.ctbl{border-collapse:collapse;font-size:12px;width:100%}
+.ctbl th{text-align:center;padding:5px 8px;font-weight:500;color:#888;border-bottom:1px solid #eee;white-space:nowrap}
+.ctbl th:first-child{text-align:left}
+.ctbl td{text-align:center;padding:5px 7px;border-radius:4px;white-space:nowrap}
+.ctbl tr td:first-child{text-align:left;color:#888;font-size:11px;padding-right:10px}
+.seg-label{font-size:12px;font-weight:500;padding:4px 10px;border-radius:6px;display:inline-block;white-space:nowrap}
+.divider{border:none;border-top:1px solid #f0f0f0;margin:16px 0}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div style="display:flex;align-items:center">
+    <span class="page-title">리텐션 대시보드</span>
+    <span class="badge" id="period-badge">2025년 1–6월</span>
+  </div>
+  <div class="filter-tabs">
+    <button class="ftab active" onclick="setPeriod(this,6)">최근 6개월</button>
+    <button class="ftab" onclick="setPeriod(this,12)">최근 12개월</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="sw(this,'all')">전체 리텐션</button>
+  <button class="tab" onclick="sw(this,'seg')">세그먼트 비교</button>
+</div>
+
+<div id="tab-all">
+  <div class="summary-cards">
+    <div class="sc">
+      <div class="sc-label">리텐션 추적 모수</div>
+      <div class="sc-value">112,060명</div>
+      <div class="sc-sub" id="sc-mosu-sub">이전 6개월 98,240명 / <span class="up">▲ +14.1%</span></div>
+    </div>
+    <div class="sc">
+      <div class="sc-label">평균 주문 주기</div>
+      <div class="sc-value">19.1일</div>
+      <div class="sc-sub" id="sc-cycle-sub">이전 6개월 대비 <span class="up">▲ 0.8일 단축</span></div>
+    </div>
+    <div class="sc">
+      <div class="sc-label">재구매율</div>
+      <div class="sc-value" id="sc-ret-val">38.4%</div>
+      <div class="sc-sub" id="sc-ret-sub">이전 6개월 대비 <span class="up">▲ 2.1%p 상승</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct">전체 코호트 리텐션 매트릭스</div>
+    <div class="cs" id="matrix-sub">첫 구매월 기준 · 최근 6개월 코호트</div>
+    <div class="cohort-wrap" id="tbl-all"></div>
+    <div class="legend">
+      <div class="li"><div class="ld" style="background:#7cb87c"></div>40%+</div>
+      <div class="li"><div class="ld" style="background:#e8c56a"></div>25–40%</div>
+      <div class="li"><div class="ld" style="background:#e08080"></div>25% 미만</div>
+    </div>
+    <hr class="divider">
+    <div class="ct">코호트별 리텐션 곡선</div>
+    <div class="cs">가로축: 첫 구매 후 주차 · 세로축: 재구매율 · 선: 각 코호트</div>
+    <div style="position:relative;height:220px"><canvas id="c-cohort-all"></canvas></div>
+    <div class="legend" id="leg-cohort-all"></div>
+  </div>
+</div>
+
+<div id="tab-seg" style="display:none">
+  <div class="card">
+    <div class="ct">세그먼트별 모수 추이</div>
+    <div class="cs" id="pop-sub">월 기준 · 최근 6개월</div>
+    <div style="position:relative;height:190px"><canvas id="c-population"></canvas></div>
+    <div class="legend">
+      <div class="li"><div class="ldash" style="background:#1D9E75"></div>활성패써</div>
+      <div class="li"><div class="ldash" style="background:#D85A30"></div>이탈패써</div>
+      <div class="li"><div class="ldash" style="background:#378ADD"></div>0회 주문자 출신</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct">세그먼트별 재구매율 추이 비교</div>
+    <div class="cs" id="seg-sub">월 기준 · 4주 재구매율 · 최근 6개월</div>
+    <div style="position:relative;height:180px"><canvas id="c-seg"></canvas></div>
+    <div class="legend">
+      <div class="li"><div class="ldash" style="background:#378ADD"></div>0회 주문자 출신</div>
+      <div class="li"><div class="ldash" style="background:#1D9E75"></div>활성패써</div>
+      <div class="li"><div class="ldash" style="background:#D85A30"></div>이탈패써 (윈백 후)</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div><div class="ct">0회 주문자 출신 코호트 리텐션</div><div class="cs">첫 구매 완료 후 주차별 재구매율</div></div>
+      <span class="seg-label" style="background:#e8f2fc;color:#1a5fa8">0회 주문자 출신</span>
+    </div>
+    <div class="notice">첫 주문 전환은 제외 · 재구매부터 측정</div>
+    <div class="cohort-wrap" id="tbl-new"></div>
+    <hr class="divider">
+    <div class="ct">코호트별 리텐션 곡선</div>
+    <div class="cs">가로축: 첫 구매 후 주차 · 세로축: 재구매율</div>
+    <div style="position:relative;height:200px"><canvas id="c-cohort-new"></canvas></div>
+    <div class="legend" id="leg-cohort-new"></div>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div><div class="ct">활성패써 코호트 리텐션</div><div class="cs">첫 구매월 기준 · 주차별 재구매율</div></div>
+      <span class="seg-label" style="background:#e4f5ee;color:#0d6640">활성패써</span>
+    </div>
+    <div style="height:14px"></div>
+    <div class="cohort-wrap" id="tbl-act"></div>
+    <hr class="divider">
+    <div class="ct">코호트별 리텐션 곡선</div>
+    <div class="cs">가로축: 첫 구매 후 주차 · 세로축: 재구매율</div>
+    <div style="position:relative;height:200px"><canvas id="c-cohort-act"></canvas></div>
+    <div class="legend" id="leg-cohort-act"></div>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div><div class="ct">이탈패써 코호트 리텐션</div><div class="cs">윈백 성공 후 주차별 재구매율</div></div>
+      <span class="seg-label" style="background:#fdf0eb;color:#8c3010">이탈패써</span>
+    </div>
+    <div class="notice">윈백 캠페인 전환 유저 기준 · 재이탈 여부 추적</div>
+    <div class="cohort-wrap" id="tbl-churn"></div>
+    <hr class="divider">
+    <div class="ct">코호트별 리텐션 곡선</div>
+    <div class="cs">가로축: 첫 구매 후 주차 · 세로축: 재구매율</div>
+    <div style="position:relative;height:200px"><canvas id="c-cohort-churn"></canvas></div>
+    <div class="legend" id="leg-cohort-churn"></div>
+  </div>
+</div>
+
+<script>
+var charts={},built={},currentPeriod=6;
+var tSec='#aaa',grid='rgba(0,0,0,0.06)';
+var WEEKS=['W1','W2','W3','W4','W5','W6'];
+var PALETTES={
+  blue:['#042C53','#0C447C','#185FA5','#378ADD','#85B7EB','#B5D4F4'],
+  green:['#04342C','#085041','#0F6E56','#1D9E75','#5DCAA5','#9FE1CB'],
+  coral:['#4A1B0C','#712B13','#993C1D','#D85A30','#F0997B','#F5C4B3']
+};
+var COHORT_DATA={
+  all:[{label:'1월',vals:[51,43,37,33,28,25]},{label:'2월',vals:[53,45,39,35,30,27]},{label:'3월',vals:[55,47,41,37,32,null]},{label:'4월',vals:[52,44,38,34,null,null]},{label:'5월',vals:[54,46,null,null,null,null]},{label:'6월',vals:[53,null,null,null,null,null]}],
+  new:[{label:'1월 신규',vals:[28,22,18,15,12,10]},{label:'2월 신규',vals:[30,24,20,17,14,null]},{label:'3월 신규',vals:[32,26,22,18,null,null]},{label:'4월 신규',vals:[29,23,19,null,null,null]}],
+  act:[{label:'1월 활성',vals:[55,47,42,38,33,29]},{label:'2월 활성',vals:[57,49,44,40,35,null]},{label:'3월 활성',vals:[59,51,46,42,null,null]},{label:'4월 활성',vals:[56,48,43,null,null,null]}],
+  churn:[{label:'1월 윈백',vals:[19,14,11,9,7,5]},{label:'2월 윈백',vals:[20,15,12,10,8,null]},{label:'3월 윈백',vals:[21,16,13,11,null,null]},{label:'4월 윈백',vals:[18,14,11,null,null,null]}]
+};
+var PERIOD={
+  6:{badge:'2025년 1–6월',mosuSub:'이전 6개월 98,240명 / <span class="up">▲ +14.1%</span>',cycleSub:'이전 6개월 대비 <span class="up">▲ 0.8일 단축</span>',retVal:'38.4%',retSub:'이전 6개월 대비 <span class="up">▲ 2.1%p 상승</span>',months:['1월','2월','3월','4월','5월','6월'],pop:{active:[80100,82400,84000,85500,86900,89240],churn:[44500,43800,43100,42500,41700,41520],new:[22300,23000,23800,24100,24400,24810]},seg:{new:[24.1,25.3,25.9,27.0,27.4,28.1],active:[44.2,45.1,46.0,46.8,47.0,47.3],churn:[16.1,16.9,17.4,18.1,18.2,18.6]}},
+  12:{badge:'2024년 7월–2025년 6월',mosuSub:'이전 12개월 81,400명 / <span class="up">▲ +37.7%</span>',cycleSub:'이전 12개월 대비 <span class="up">▲ 1.4일 단축</span>',retVal:'35.8%',retSub:'이전 12개월 대비 <span class="up">▲ 3.4%p 상승</span>',months:['7월','8월','9월','10월','11월','12월','1월','2월','3월','4월','5월','6월'],pop:{active:[60000,63000,66000,69000,72000,76000,80000,84000,86000,87000,88000,89240],churn:[54000,52000,50000,48000,46000,44000,43000,42500,42100,41800,41600,41520],new:[12000,14000,16000,18000,20000,22000,23000,24000,24400,24600,24700,24810]},seg:{new:[20.0,21.2,22.5,23.0,24.1,25.3,25.9,27.0,27.4,27.8,28.0,28.1],active:[40.0,41.5,42.8,43.5,44.2,45.1,46.0,46.8,47.0,47.1,47.2,47.3],churn:[13.0,13.8,14.5,15.2,16.1,16.9,17.4,18.1,18.2,18.4,18.5,18.6]}}
+};
+function ccol(v){
+  if(v>=40)return{bg:'#d4edcc',tx:'#2d6a1f'};
+  if(v>=25)return{bg:'#fdf0c0',tx:'#7a5500'};
+  return{bg:'#fad4d4',tx:'#8c2020'};
+}
+function makeTbl(id,rows,weeks){
+  if(built[id])return;built[id]=true;
+  var wrap=document.getElementById(id);
+  var t=document.createElement('table');t.className='ctbl';
+  var h='<tr><th>코호트</th>';weeks.forEach(function(w){h+='<th>'+w+'</th>';});h+='</tr>';
+  t.innerHTML=h;
+  rows.forEach(function(r){
+    var tr=document.createElement('tr');
+    var html='<td>'+r.label+'</td>';
+    r.vals.forEach(function(v,i){
+      if(i===0){html+='<td style="background:#f5f5f5;color:#999;font-size:11px">기준</td>';return;}
+      if(v===-1||v===null){html+='<td style="color:#ccc">—</td>';return;}
+      var c=ccol(v);html+='<td style="background:'+c.bg+';color:'+c.tx+';font-weight:500">'+v+'%</td>';
+    });
+    tr.innerHTML=html;t.appendChild(tr);
+  });
+  wrap.appendChild(t);
+}
+function buildCohortLine(canvasId,legendId,cohorts,palette){
+  if(charts[canvasId])return;
+  var colors=PALETTES[palette];
+  charts[canvasId]=new Chart(document.getElementById(canvasId),{
+    type:'line',
+    data:{labels:WEEKS,datasets:cohorts.map(function(c,i){return{label:c.label,data:c.vals,borderColor:colors[i%colors.length],backgroundColor:'transparent',borderWidth:2,pointRadius:3,pointBackgroundColor:colors[i%colors.length],tension:0.4,spanGaps:false};})},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){return c.dataset.label+(c.parsed.y!==null?': '+c.parsed.y+'%':'');}}}},scales:{x:{grid:{color:grid},ticks:{color:tSec,font:{size:11}}},y:{grid:{color:grid},ticks:{color:tSec,font:{size:11},callback:function(v){return v+'%'}},min:0,max:70}}}
+  });
+  var leg=document.getElementById(legendId);
+  if(leg){leg.innerHTML='';cohorts.forEach(function(c,i){var d=document.createElement('div');d.className='li';d.innerHTML='<div class="ldash" style="background:'+colors[i%colors.length]+'"></div>'+c.label;leg.appendChild(d);});}
+}
+function setPeriod(el,months){
+  document.querySelectorAll('.ftab').forEach(function(t){t.classList.remove('active');});
+  el.classList.add('active');currentPeriod=months;
+  var p=PERIOD[months];
+  document.getElementById('period-badge').textContent=p.badge;
+  document.getElementById('matrix-sub').textContent='첫 구매월 기준 · 최근 '+months+'개월 코호트';
+  document.getElementById('pop-sub').textContent='월 기준 · 최근 '+months+'개월';
+  document.getElementById('seg-sub').textContent='월 기준 · 4주 재구매율 · 최근 '+months+'개월';
+  document.getElementById('sc-mosu-sub').innerHTML=p.mosuSub;
+  document.getElementById('sc-cycle-sub').innerHTML=p.cycleSub;
+  document.getElementById('sc-ret-val').textContent=p.retVal;
+  document.getElementById('sc-ret-sub').innerHTML=p.retSub;
+  if(charts['c-population']){charts['c-population'].data.labels=p.months;charts['c-population'].data.datasets[0].data=p.pop.active;charts['c-population'].data.datasets[1].data=p.pop.churn;charts['c-population'].data.datasets[2].data=p.pop.new;charts['c-population'].update();}
+  if(charts['c-seg']){charts['c-seg'].data.labels=p.months;charts['c-seg'].data.datasets[0].data=p.seg.new;charts['c-seg'].data.datasets[1].data=p.seg.active;charts['c-seg'].data.datasets[2].data=p.seg.churn;charts['c-seg'].update();}
+}
+function sw(el,tab){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  el.classList.add('active');
+  ['all','seg'].forEach(function(t){document.getElementById('tab-'+t).style.display=t===tab?'':'none';});
+  setTimeout(function(){draw(tab);},80);
+}
+function draw(tab){
+  var p=PERIOD[currentPeriod];
+  if(tab==='all'){
+    makeTbl('tbl-all',[{label:'1월',vals:[null,51,43,37,33,28,25]},{label:'2월',vals:[null,53,45,39,35,30,27]},{label:'3월',vals:[null,55,47,41,37,32,-1]},{label:'4월',vals:[null,52,44,38,34,-1,-1]},{label:'5월',vals:[null,54,46,-1,-1,-1,-1]},{label:'6월',vals:[null,53,-1,-1,-1,-1,-1]}],['W0','W1','W2','W3','W4','W5','W6']);
+    buildCohortLine('c-cohort-all','leg-cohort-all',COHORT_DATA.all,'blue');
+  }
+  if(tab==='seg'){
+    if(!charts['c-population']){
+      charts['c-population']=new Chart(document.getElementById('c-population'),{type:'line',data:{labels:p.months,datasets:[{label:'활성패써',data:p.pop.active,borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,0.07)',fill:true,pointRadius:3,tension:0.4,borderWidth:2},{label:'이탈패써',data:p.pop.churn,borderColor:'#D85A30',backgroundColor:'rgba(216,90,48,0.07)',fill:true,pointRadius:3,tension:0.4,borderWidth:2},{label:'0회 출신',data:p.pop.new,borderColor:'#378ADD',backgroundColor:'rgba(55,138,221,0.07)',fill:true,pointRadius:3,tension:0.4,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',callbacks:{label:function(c){return c.dataset.label+': '+c.parsed.y.toLocaleString()+'명';}}}},scales:{x:{grid:{color:grid},ticks:{color:tSec,font:{size:11}}},y:{grid:{color:grid},ticks:{color:tSec,font:{size:11},callback:function(v){return Math.round(v/10000)+'만';}},min:0}}}});
+    }
+    makeTbl('tbl-new',[{label:'1월 신규',vals:[null,28,22,18,15,12,10]},{label:'2월 신규',vals:[null,30,24,20,17,14,-1]},{label:'3월 신규',vals:[null,32,26,22,18,-1,-1]},{label:'4월 신규',vals:[null,29,23,19,-1,-1,-1]}],['W0','W1','W2','W3','W4','W5','W6']);
+    buildCohortLine('c-cohort-new','leg-cohort-new',COHORT_DATA.new,'blue');
+    makeTbl('tbl-act',[{label:'1월 활성',vals:[null,55,47,42,38,33,29]},{label:'2월 활성',vals:[null,57,49,44,40,35,-1]},{label:'3월 활성',vals:[null,59,51,46,42,-1,-1]},{label:'4월 활성',vals:[null,56,48,43,-1,-1,-1]}],['W0','W1','W2','W3','W4','W5','W6']);
+    buildCohortLine('c-cohort-act','leg-cohort-act',COHORT_DATA.act,'green');
+    makeTbl('tbl-churn',[{label:'1월 윈백',vals:[null,19,14,11,9,7,5]},{label:'2월 윈백',vals:[null,20,15,12,10,8,-1]},{label:'3월 윈백',vals:[null,21,16,13,11,-1,-1]},{label:'4월 윈백',vals:[null,18,14,11,-1,-1,-1]}],['W0','W1','W2','W3','W4','W5','W6']);
+    buildCohortLine('c-cohort-churn','leg-cohort-churn',COHORT_DATA.churn,'coral');
+    if(!charts['c-seg']){
+      charts['c-seg']=new Chart(document.getElementById('c-seg'),{type:'line',data:{labels:p.months,datasets:[{label:'0회 출신',data:p.seg.new,borderColor:'#378ADD',backgroundColor:'transparent',pointRadius:3,tension:0.4,borderWidth:2},{label:'활성패써',data:p.seg.active,borderColor:'#1D9E75',backgroundColor:'transparent',pointRadius:3,tension:0.4,borderWidth:2},{label:'이탈패써(윈백 후)',data:p.seg.churn,borderColor:'#D85A30',backgroundColor:'transparent',pointRadius:3,tension:0.4,borderWidth:2,borderDash:[4,3]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index'}},scales:{x:{grid:{color:grid},ticks:{color:tSec,font:{size:11}}},y:{grid:{color:grid},ticks:{color:tSec,font:{size:11},callback:function(v){return v+'%'}},min:10,max:55}}}});
+    }
+  }
+}
+draw('all');
+</script>
+</body>
+</html>
