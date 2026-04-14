@@ -319,10 +319,11 @@ var PERIOD={
   6:{badge:'2025년 1–6월',mosuSub:'이전 6개월 98,240명 / <span class="up">▲ +14.1%</span>',cycleSub:'이전 6개월 대비 <span class="up">▲ 0.8일 단축</span>',retVal:'38.4%',retSub:'이전 6개월 대비 <span class="up">▲ 2.1%p 상승</span>',cycleValVisit:'3.2일',cycleSubVisit:'이전 6개월 대비 <span class="up">▲ 0.3일 단축</span>',retValVisit:'54.7%',retSubVisit:'이전 6개월 대비 <span class="up">▲ 1.8%p 상승</span>',months:['1월','2월','3월','4월','5월','6월'],pop:{active:[80100,82400,84000,85500,86900,89240],churn:[44500,43800,43100,42500,41700,41520],new:[22300,23000,23800,24100,24400,24810]},seg:{new:[28,30,32,29,null,null],active:[55,57,59,56,null,null],churn:[19,20,21,18,null,null]},segVisit:{new:[45,47,49,46,null,null],active:[72,74,76,73,null,null],churn:[35,36,37,34,null,null]}},
   12:{badge:'2024년 7월–2025년 6월',mosuSub:'이전 12개월 81,400명 / <span class="up">▲ +37.7%</span>',cycleSub:'이전 12개월 대비 <span class="up">▲ 1.4일 단축</span>',retVal:'35.8%',retSub:'이전 12개월 대비 <span class="up">▲ 3.4%p 상승</span>',cycleValVisit:'3.5일',cycleSubVisit:'이전 12개월 대비 <span class="up">▲ 0.5일 단축</span>',retValVisit:'52.1%',retSubVisit:'이전 12개월 대비 <span class="up">▲ 2.9%p 상승</span>',months:['7월','8월','9월','10월','11월','12월','1월','2월','3월','4월','5월','6월'],pop:{active:[60000,63000,66000,69000,72000,76000,80000,84000,86000,87000,88000,89240],churn:[54000,52000,50000,48000,46000,44000,43000,42500,42100,41800,41600,41520],new:[12000,14000,16000,18000,20000,22000,23000,24000,24400,24600,24700,24810]},seg:{new:[22,23,25,26,27,28,30,32,29,null,null,null],active:[48,49,51,52,53,55,57,59,56,null,null,null],churn:[14,15,16,17,18,19,20,21,18,null,null,null]},segVisit:{new:[38,39,41,42,43,45,47,49,46,null,null,null],active:[64,66,67,69,70,72,74,76,73,null,null,null],churn:[28,29,31,32,33,35,36,37,34,null,null,null]}}
 };
+var COHORT_SEG_DAY_COLS=['D1','D2','D3','D4','D5','D6','D7','D14'];
 var COHORT_SEG_DAY={
-  act:[{label:'1월 활성',vals:[58,50,45,41,36,32]},{label:'2월 활성',vals:[60,52,47,43,38,null]},{label:'3월 활성',vals:[62,54,49,45,null,null]},{label:'4월 활성',vals:[59,51,46,null,null,null]}],
-  new:[{label:'1월 신규',vals:[32,25,20,17,14,11]},{label:'2월 신규',vals:[34,27,22,19,16,null]},{label:'3월 신규',vals:[36,29,24,20,null,null]},{label:'4월 신규',vals:[33,26,21,null,null,null]}],
-  churn:[{label:'1월 윈백',vals:[22,16,13,10,8,6]},{label:'2월 윈백',vals:[23,17,14,11,9,null]},{label:'3월 윈백',vals:[24,18,15,12,null,null]},{label:'4월 윈백',vals:[21,15,12,null,null,null]}]
+  act:[{label:'1월 활성',vals:[58,55,52,50,48,46,45,38]},{label:'2월 활성',vals:[60,57,54,52,50,48,47,40]},{label:'3월 활성',vals:[62,59,56,54,52,50,49,42]},{label:'4월 활성',vals:[59,56,53,51,49,47,46,null]}],
+  new:[{label:'1월 신규',vals:[32,29,26,24,22,21,20,15]},{label:'2월 신규',vals:[34,31,28,26,24,23,22,17]},{label:'3월 신규',vals:[36,33,30,28,26,25,24,19]},{label:'4월 신규',vals:[33,30,27,25,23,22,21,null]}],
+  churn:[{label:'1월 윈백',vals:[22,19,17,15,14,13,13,9]},{label:'2월 윈백',vals:[23,20,18,16,15,14,14,10]},{label:'3월 윈백',vals:[24,21,19,17,16,15,15,11]},{label:'4월 윈백',vals:[21,18,16,14,13,12,12,null]}]
 };
 var cohortSeg='act',cohortType='week';
 var COHORT_NOTICES={new:'첫 주문 전환은 제외 · 재구매부터 측정',churn:'윈백 캠페인 전환 유저 기준 · 재이탈 여부 추적'};
@@ -493,13 +494,13 @@ function renderCohortUnified(){
   // Table
   var wrap=document.getElementById('tbl-cohort-unified');wrap.innerHTML='';
   var isDay=cohortType==='day';
-  var weeks=isDay?['D1','D3','D7','D14','D30','D60']:['W0','W1','W2','W3','W4','W5','W6'];
+  var weeks=isDay?COHORT_SEG_DAY_COLS:['W0','W1','W2','W3','W4','W5','W6'];
   var dataKey=cohortSeg;
   var rows;
   if(isDay){
     rows=COHORT_SEG_DAY[dataKey];
     var t=document.createElement('table');t.className='ctbl';
-    var h='<tr><th>코호트</th>';['D1','D3','D7','D14','D30','D60'].forEach(function(w){h+='<th>'+w+'</th>';});h+='</tr>';
+    var h='<tr><th>코호트</th>';COHORT_SEG_DAY_COLS.forEach(function(w){h+='<th>'+w+'</th>';});h+='</tr>';
     t.innerHTML=h;
     rows.forEach(function(r){
       var tr=document.createElement('tr');
@@ -533,7 +534,7 @@ function renderCohortUnified(){
   var canvasId='c-cohort-unified';
   if(charts[canvasId]){charts[canvasId].destroy();delete charts[canvasId];}
   var chartData=isDay?COHORT_SEG_DAY[dataKey]:COHORT_DATA[dataKey];
-  var labels=isDay?['D1','D3','D7','D14','D30','D60']:WEEKS;
+  var labels=isDay?COHORT_SEG_DAY_COLS:WEEKS;
   var palette=COHORT_PALETTES[cohortSeg];
   var colors=PALETTES[palette];
   charts[canvasId]=new Chart(document.getElementById(canvasId),{
