@@ -33,6 +33,13 @@ body{background:#0a0a0f;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Se
 .tab.active{background:rgba(96,165,250,0.15);color:#60a5fa;border:1px solid rgba(96,165,250,0.3);box-shadow:0 2px 12px rgba(96,165,250,0.15)}
 .tab svg{width:16px;height:16px;flex-shrink:0}
 
+/* Sub tabs (주문/방문) */
+.sub-tabs{display:flex;gap:4px;margin-bottom:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:3px;width:fit-content}
+.stab{padding:6px 16px;font-size:11px;font-weight:500;border-radius:7px;cursor:pointer;border:1px solid transparent;background:transparent;color:#6b6b80;transition:all 0.2s ease;font-family:inherit;display:flex;align-items:center;gap:5px}
+.stab:hover{color:#a0a0b8}
+.stab.active{background:rgba(255,255,255,0.08);color:#e8e8ed;border-color:rgba(255,255,255,0.12)}
+.stab svg{width:13px;height:13px}
+
 /* Summary cards */
 .summary-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
 .sc{background:linear-gradient(145deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:24px 26px;backdrop-filter:blur(10px);transition:border-color 0.2s ease}
@@ -92,6 +99,14 @@ body{background:#0a0a0f;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Se
 ::-webkit-scrollbar-track{background:rgba(255,255,255,0.02);border-radius:3px}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px}
 ::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.18)}
+
+/* Inline filter rows */
+.filter-row-inline{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.filter-inline-label{font-size:12px;font-weight:500;color:#6b6b80;min-width:56px;white-space:nowrap}
+
+/* Sub-tab content */
+.stab-content{display:none}
+.stab-content.active{display:block}
 </style>
 </head>
 <body>
@@ -118,24 +133,35 @@ body{background:#0a0a0f;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Se
   <div class="summary-cards">
     <div class="sc">
       <div class="sc-label">리텐션 추적 모수</div>
-      <div class="sc-value">112,060명</div>
+      <div class="sc-value" id="sc-mosu-val">112,060명</div>
       <div class="sc-sub" id="sc-mosu-sub">이전 6개월 98,240명 / <span class="up">▲ +14.1%</span></div>
     </div>
     <div class="sc">
-      <div class="sc-label">평균 주문 주기</div>
-      <div class="sc-value">19.1일</div>
+      <div class="sc-label" id="sc-cycle-label">평균 주문 주기</div>
+      <div class="sc-value" id="sc-cycle-val">19.1일</div>
       <div class="sc-sub" id="sc-cycle-sub">이전 6개월 대비 <span class="up">▲ 0.8일 단축</span></div>
     </div>
     <div class="sc">
-      <div class="sc-label">재구매율</div>
+      <div class="sc-label" id="sc-ret-label">재구매율</div>
       <div class="sc-value" id="sc-ret-val">38.4%</div>
       <div class="sc-sub" id="sc-ret-sub">이전 6개월 대비 <span class="up">▲ 2.1%p 상승</span></div>
     </div>
   </div>
+
+  <!-- 전체 코호트 리텐션 매트릭스 -->
   <div class="card">
     <div class="ct">전체 코호트 리텐션 매트릭스</div>
     <div class="cs" id="matrix-sub">첫 구매월 기준 · 최근 6개월 코호트</div>
-    <div class="cohort-wrap" id="tbl-all"></div>
+    <div class="sub-tabs" id="stabs-matrix">
+      <button class="stab active" onclick="swSub('matrix','order',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>주문 리텐션</button>
+      <button class="stab" onclick="swSub('matrix','visit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>방문 리텐션</button>
+    </div>
+    <div id="matrix-order" class="stab-content active">
+      <div class="cohort-wrap" id="tbl-all"></div>
+    </div>
+    <div id="matrix-visit" class="stab-content">
+      <div class="cohort-wrap" id="tbl-all-visit"></div>
+    </div>
     <div class="legend">
       <div class="li"><div class="ld" style="background:#34d399"></div>40%+</div>
       <div class="li"><div class="ld" style="background:#fbbf24"></div>25–40%</div>
@@ -144,17 +170,34 @@ body{background:#0a0a0f;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Se
     <hr class="divider">
     <div class="ct">코호트별 리텐션 곡선</div>
     <div class="cs">가로축: 첫 구매 후 주차 · 세로축: 재구매율 · 선: 각 코호트</div>
-    <div style="position:relative;height:240px"><canvas id="c-cohort-all"></canvas></div>
-    <div class="legend" id="leg-cohort-all"></div>
+    <div id="curve-order" class="stab-content active">
+      <div style="position:relative;height:240px"><canvas id="c-cohort-all"></canvas></div>
+      <div class="legend" id="leg-cohort-all"></div>
+    </div>
+    <div id="curve-visit" class="stab-content">
+      <div style="position:relative;height:240px"><canvas id="c-cohort-all-visit"></canvas></div>
+      <div class="legend" id="leg-cohort-all-visit"></div>
+    </div>
   </div>
+
+  <!-- N-Day 리텐션 히트맵 -->
   <div class="card">
     <div class="ct">N-Day 리텐션 히트맵</div>
     <div class="cs">첫 구매월 기준 코호트 · 특정 경과일 시점의 재구매율</div>
+    <div class="sub-tabs" id="stabs-nday">
+      <button class="stab active" onclick="swSub('nday','order',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>주문 리텐션</button>
+      <button class="stab" onclick="swSub('nday','visit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>방문 리텐션</button>
+    </div>
     <div class="nday-selector">
       <span class="nday-selector-label">조회 Day 설정</span>
       <div class="nday-options" id="nday-options"></div>
     </div>
-    <div class="cohort-wrap" id="tbl-nday"></div>
+    <div id="nday-order" class="stab-content active">
+      <div class="cohort-wrap" id="tbl-nday"></div>
+    </div>
+    <div id="nday-visit" class="stab-content">
+      <div class="cohort-wrap" id="tbl-nday-visit"></div>
+    </div>
     <div class="legend">
       <div class="li"><div class="ld" style="background:#a78bfa"></div>50%+</div>
       <div class="li"><div class="ld" style="background:#34d399"></div>40–50%</div>
@@ -165,6 +208,7 @@ body{background:#0a0a0f;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Se
 </div>
 
 <div id="tab-seg" style="display:none">
+  <!-- 세그먼트별 모수 추이 -->
   <div class="card">
     <div class="ct">세그먼트별 모수 추이</div>
     <div class="cs" id="pop-sub">월 기준 · 최근 6개월</div>
@@ -175,59 +219,57 @@ body{background:#0a0a0f;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Se
       <div class="li"><div class="ldash" style="background:#60a5fa"></div>0회 주문자 출신</div>
     </div>
   </div>
+
+  <!-- 세그먼트별 재구매율 추이 비교 -->
   <div class="card">
-    <div class="ct">세그먼트별 재구매율 추이 비교</div>
+    <div class="ct">세그먼트별 리텐션 추이 비교</div>
     <div class="cs" id="seg-sub">월 기준 · 4주 재구매율 · 최근 6개월</div>
-    <div style="position:relative;height:200px"><canvas id="c-seg"></canvas></div>
+    <div class="sub-tabs" id="stabs-seg-trend">
+      <button class="stab active" onclick="swSub('seg-trend','order',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>주문 리텐션</button>
+      <button class="stab" onclick="swSub('seg-trend','visit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>방문 리텐션</button>
+    </div>
+    <div id="seg-trend-order" class="stab-content active">
+      <div style="position:relative;height:200px"><canvas id="c-seg"></canvas></div>
+    </div>
+    <div id="seg-trend-visit" class="stab-content">
+      <div style="position:relative;height:200px"><canvas id="c-seg-visit"></canvas></div>
+    </div>
     <div class="legend">
       <div class="li"><div class="ldash" style="background:#60a5fa"></div>0회 주문자 출신</div>
       <div class="li"><div class="ldash" style="background:#34d399"></div>활성패써</div>
       <div class="li"><div class="ldash" style="background:#fb923c"></div>이탈패써 (윈백 후)</div>
     </div>
   </div>
+
+  <!-- 코호트별 리텐션 (통합) -->
   <div class="card">
-    <div class="card-head">
-      <div><div class="ct">0회 주문자 출신 코호트 리텐션</div><div class="cs">첫 구매 완료 후 주차별 재구매율</div></div>
-      <span class="seg-label" style="background:rgba(96,165,250,0.15);color:#60a5fa">0회 주문자 출신</span>
+    <div class="ct">코호트별 리텐션</div>
+    <div class="cs">세그먼트 · 측정 타입별 코호트 리텐션 곡선</div>
+    <div class="filter-row-inline">
+      <span class="filter-inline-label">세그먼트</span>
+      <div class="sub-tabs" id="stabs-cohort-seg">
+        <button class="stab active" onclick="swCohortFilter('seg','act',this)">활성패써</button>
+        <button class="stab" onclick="swCohortFilter('seg','new',this)">0회주문자</button>
+        <button class="stab" onclick="swCohortFilter('seg','churn',this)">이탈패써</button>
+      </div>
     </div>
-    <div class="notice">첫 주문 전환은 제외 · 재구매부터 측정</div>
-    <div class="cohort-wrap" id="tbl-new"></div>
-    <hr class="divider">
-    <div class="ct">코호트별 리텐션 곡선</div>
-    <div class="cs">가로축: 첫 구매 후 주차 · 세로축: 재구매율</div>
-    <div style="position:relative;height:200px"><canvas id="c-cohort-new"></canvas></div>
-    <div class="legend" id="leg-cohort-new"></div>
-  </div>
-  <div class="card">
-    <div class="card-head">
-      <div><div class="ct">활성패써 코호트 리텐션</div><div class="cs">첫 구매월 기준 · 주차별 재구매율</div></div>
-      <span class="seg-label" style="background:rgba(52,211,153,0.15);color:#34d399">활성패써</span>
+    <div class="filter-row-inline">
+      <span class="filter-inline-label">측정 타입</span>
+      <div class="sub-tabs" id="stabs-cohort-type">
+        <button class="stab active" onclick="swCohortFilter('type','week',this)">1W 리텐션</button>
+        <button class="stab" onclick="swCohortFilter('type','day',this)">Day-1 리텐션</button>
+      </div>
     </div>
-    <div style="height:14px"></div>
-    <div class="cohort-wrap" id="tbl-act"></div>
+    <div id="cohort-notice" class="notice" style="display:none"></div>
+    <div class="cohort-wrap" id="tbl-cohort-unified"></div>
     <hr class="divider">
-    <div class="ct">코호트별 리텐션 곡선</div>
-    <div class="cs">가로축: 첫 구매 후 주차 · 세로축: 재구매율</div>
-    <div style="position:relative;height:200px"><canvas id="c-cohort-act"></canvas></div>
-    <div class="legend" id="leg-cohort-act"></div>
-  </div>
-  <div class="card">
-    <div class="card-head">
-      <div><div class="ct">이탈패써 코호트 리텐션</div><div class="cs">윈백 성공 후 주차별 재구매율</div></div>
-      <span class="seg-label" style="background:rgba(251,146,60,0.15);color:#fb923c">이탈패써</span>
-    </div>
-    <div class="notice">윈백 캠페인 전환 유저 기준 · 재이탈 여부 추적</div>
-    <div class="cohort-wrap" id="tbl-churn"></div>
-    <hr class="divider">
-    <div class="ct">코호트별 리텐션 곡선</div>
-    <div class="cs">가로축: 첫 구매 후 주차 · 세로축: 재구매율</div>
-    <div style="position:relative;height:200px"><canvas id="c-cohort-churn"></canvas></div>
-    <div class="legend" id="leg-cohort-churn"></div>
+    <div style="position:relative;height:220px"><canvas id="c-cohort-unified"></canvas></div>
+    <div class="legend" id="leg-cohort-unified"></div>
   </div>
 </div>
 
 <script>
-var charts={},built={},currentPeriod=6;
+var charts={},built={},currentPeriod=6,currentSubMode={};
 var tSec='#6b6b80',grid='rgba(255,255,255,0.05)';
 var WEEKS=['W1','W2','W3','W4','W5','W6'];
 var PALETTES={
@@ -237,27 +279,58 @@ var PALETTES={
 };
 var NDAY_ALL_DAYS=[1,2,3,5,7,10,14,21,30,45,60,90];
 var NDAY_SELECTED=[1,7,14,30,60,90];
-var NDAY_COHORTS=[
-  {label:'1월',data:{1:65,2:61,3:58,5:54,7:48,10:43,14:38,21:33,30:28,45:23,60:21,90:17}},
-  {label:'2월',data:{1:63,2:60,3:57,5:52,7:47,10:42,14:37,21:32,30:27,45:22,60:20,90:null}},
-  {label:'3월',data:{1:66,2:63,3:59,5:55,7:49,10:44,14:39,21:34,30:29,45:null,60:null,90:null}},
-  {label:'4월',data:{1:61,2:58,3:55,5:50,7:45,10:40,14:36,21:31,30:null,45:null,60:null,90:null}},
-  {label:'5월',data:{1:64,2:61,3:57,5:53,7:47,10:42,14:37,21:null,30:null,45:null,60:null,90:null}},
-  {label:'6월',data:{1:62,2:59,3:55,5:51,7:null,10:null,14:null,21:null,30:null,45:null,60:null,90:null}}
-];
+
+/* === 주문 리텐션 데이터 === */
+var NDAY_COHORTS={
+  order:[
+    {label:'1월',data:{1:65,2:61,3:58,5:54,7:48,10:43,14:38,21:33,30:28,45:23,60:21,90:17}},
+    {label:'2월',data:{1:63,2:60,3:57,5:52,7:47,10:42,14:37,21:32,30:27,45:22,60:20,90:null}},
+    {label:'3월',data:{1:66,2:63,3:59,5:55,7:49,10:44,14:39,21:34,30:29,45:null,60:null,90:null}},
+    {label:'4월',data:{1:61,2:58,3:55,5:50,7:45,10:40,14:36,21:31,30:null,45:null,60:null,90:null}},
+    {label:'5월',data:{1:64,2:61,3:57,5:53,7:47,10:42,14:37,21:null,30:null,45:null,60:null,90:null}},
+    {label:'6월',data:{1:62,2:59,3:55,5:51,7:null,10:null,14:null,21:null,30:null,45:null,60:null,90:null}}
+  ],
+  visit:[
+    {label:'1월',data:{1:78,2:74,3:71,5:67,7:62,10:57,14:52,21:46,30:41,45:36,60:33,90:28}},
+    {label:'2월',data:{1:76,2:73,3:69,5:65,7:60,10:55,14:50,21:44,30:39,45:34,60:31,90:null}},
+    {label:'3월',data:{1:79,2:75,3:72,5:68,7:63,10:58,14:53,21:47,30:42,45:null,60:null,90:null}},
+    {label:'4월',data:{1:74,2:71,3:67,5:63,7:58,10:53,14:49,21:43,30:null,45:null,60:null,90:null}},
+    {label:'5월',data:{1:77,2:73,3:70,5:66,7:61,10:56,14:51,21:null,30:null,45:null,60:null,90:null}},
+    {label:'6월',data:{1:75,2:72,3:68,5:64,7:null,10:null,14:null,21:null,30:null,45:null,60:null,90:null}}
+  ]
+};
 var COHORT_DATA={
   all:[{label:'1월',vals:[51,43,37,33,28,25]},{label:'2월',vals:[53,45,39,35,30,27]},{label:'3월',vals:[55,47,41,37,32,null]},{label:'4월',vals:[52,44,38,34,null,null]},{label:'5월',vals:[54,46,null,null,null,null]},{label:'6월',vals:[53,null,null,null,null,null]}],
+  'all-visit':[{label:'1월',vals:[68,60,54,49,43,38]},{label:'2월',vals:[70,62,56,51,45,40]},{label:'3월',vals:[72,64,58,53,47,null]},{label:'4월',vals:[69,61,55,50,null,null]},{label:'5월',vals:[71,63,null,null,null,null]},{label:'6월',vals:[70,null,null,null,null,null]}],
   new:[{label:'1월 신규',vals:[28,22,18,15,12,10]},{label:'2월 신규',vals:[30,24,20,17,14,null]},{label:'3월 신규',vals:[32,26,22,18,null,null]},{label:'4월 신규',vals:[29,23,19,null,null,null]}],
+  'new-visit':[{label:'1월 신규',vals:[45,38,32,27,23,19]},{label:'2월 신규',vals:[47,40,34,29,25,null]},{label:'3월 신규',vals:[49,42,36,31,null,null]},{label:'4월 신규',vals:[46,39,33,null,null,null]}],
   act:[{label:'1월 활성',vals:[55,47,42,38,33,29]},{label:'2월 활성',vals:[57,49,44,40,35,null]},{label:'3월 활성',vals:[59,51,46,42,null,null]},{label:'4월 활성',vals:[56,48,43,null,null,null]}],
-  churn:[{label:'1월 윈백',vals:[19,14,11,9,7,5]},{label:'2월 윈백',vals:[20,15,12,10,8,null]},{label:'3월 윈백',vals:[21,16,13,11,null,null]},{label:'4월 윈백',vals:[18,14,11,null,null,null]}]
+  'act-visit':[{label:'1월 활성',vals:[72,65,59,54,48,43]},{label:'2월 활성',vals:[74,67,61,56,50,null]},{label:'3월 활성',vals:[76,69,63,58,null,null]},{label:'4월 활성',vals:[73,66,60,null,null,null]}],
+  churn:[{label:'1월 윈백',vals:[19,14,11,9,7,5]},{label:'2월 윈백',vals:[20,15,12,10,8,null]},{label:'3월 윈백',vals:[21,16,13,11,null,null]},{label:'4월 윈백',vals:[18,14,11,null,null,null]}],
+  'churn-visit':[{label:'1월 윈백',vals:[35,28,23,19,15,12]},{label:'2월 윈백',vals:[36,29,24,20,16,null]},{label:'3월 윈백',vals:[37,30,25,21,null,null]},{label:'4월 윈백',vals:[34,27,22,null,null,null]}]
 };
 var PERIOD={
-  6:{badge:'2025년 1–6월',mosuSub:'이전 6개월 98,240명 / <span class="up">▲ +14.1%</span>',cycleSub:'이전 6개월 대비 <span class="up">▲ 0.8일 단축</span>',retVal:'38.4%',retSub:'이전 6개월 대비 <span class="up">▲ 2.1%p 상승</span>',months:['1월','2월','3월','4월','5월','6월'],pop:{active:[80100,82400,84000,85500,86900,89240],churn:[44500,43800,43100,42500,41700,41520],new:[22300,23000,23800,24100,24400,24810]},seg:{new:[24.1,25.3,25.9,27.0,27.4,28.1],active:[44.2,45.1,46.0,46.8,47.0,47.3],churn:[16.1,16.9,17.4,18.1,18.2,18.6]}},
-  12:{badge:'2024년 7월–2025년 6월',mosuSub:'이전 12개월 81,400명 / <span class="up">▲ +37.7%</span>',cycleSub:'이전 12개월 대비 <span class="up">▲ 1.4일 단축</span>',retVal:'35.8%',retSub:'이전 12개월 대비 <span class="up">▲ 3.4%p 상승</span>',months:['7월','8월','9월','10월','11월','12월','1월','2월','3월','4월','5월','6월'],pop:{active:[60000,63000,66000,69000,72000,76000,80000,84000,86000,87000,88000,89240],churn:[54000,52000,50000,48000,46000,44000,43000,42500,42100,41800,41600,41520],new:[12000,14000,16000,18000,20000,22000,23000,24000,24400,24600,24700,24810]},seg:{new:[20.0,21.2,22.5,23.0,24.1,25.3,25.9,27.0,27.4,27.8,28.0,28.1],active:[40.0,41.5,42.8,43.5,44.2,45.1,46.0,46.8,47.0,47.1,47.2,47.3],churn:[13.0,13.8,14.5,15.2,16.1,16.9,17.4,18.1,18.2,18.4,18.5,18.6]}}
+  6:{badge:'2025년 1–6월',mosuSub:'이전 6개월 98,240명 / <span class="up">▲ +14.1%</span>',cycleSub:'이전 6개월 대비 <span class="up">▲ 0.8일 단축</span>',retVal:'38.4%',retSub:'이전 6개월 대비 <span class="up">▲ 2.1%p 상승</span>',cycleValVisit:'3.2일',cycleSubVisit:'이전 6개월 대비 <span class="up">▲ 0.3일 단축</span>',retValVisit:'54.7%',retSubVisit:'이전 6개월 대비 <span class="up">▲ 1.8%p 상승</span>',months:['1월','2월','3월','4월','5월','6월'],pop:{active:[80100,82400,84000,85500,86900,89240],churn:[44500,43800,43100,42500,41700,41520],new:[22300,23000,23800,24100,24400,24810]},seg:{new:[24.1,25.3,25.9,27.0,27.4,28.1],active:[44.2,45.1,46.0,46.8,47.0,47.3],churn:[16.1,16.9,17.4,18.1,18.2,18.6]},segVisit:{new:[41.2,42.5,43.1,44.3,44.8,45.5],active:[61.0,62.1,63.0,63.8,64.0,64.3],churn:[30.5,31.2,31.8,32.4,32.6,33.0]}},
+  12:{badge:'2024년 7월–2025년 6월',mosuSub:'이전 12개월 81,400명 / <span class="up">▲ +37.7%</span>',cycleSub:'이전 12개월 대비 <span class="up">▲ 1.4일 단축</span>',retVal:'35.8%',retSub:'이전 12개월 대비 <span class="up">▲ 3.4%p 상승</span>',cycleValVisit:'3.5일',cycleSubVisit:'이전 12개월 대비 <span class="up">▲ 0.5일 단축</span>',retValVisit:'52.1%',retSubVisit:'이전 12개월 대비 <span class="up">▲ 2.9%p 상승</span>',months:['7월','8월','9월','10월','11월','12월','1월','2월','3월','4월','5월','6월'],pop:{active:[60000,63000,66000,69000,72000,76000,80000,84000,86000,87000,88000,89240],churn:[54000,52000,50000,48000,46000,44000,43000,42500,42100,41800,41600,41520],new:[12000,14000,16000,18000,20000,22000,23000,24000,24400,24600,24700,24810]},seg:{new:[20.0,21.2,22.5,23.0,24.1,25.3,25.9,27.0,27.4,27.8,28.0,28.1],active:[40.0,41.5,42.8,43.5,44.2,45.1,46.0,46.8,47.0,47.1,47.2,47.3],churn:[13.0,13.8,14.5,15.2,16.1,16.9,17.4,18.1,18.2,18.4,18.5,18.6]},segVisit:{new:[36.0,37.5,38.8,39.5,41.2,42.5,43.1,44.3,44.8,45.0,45.2,45.5],active:[56.0,57.5,58.8,59.5,61.0,62.1,63.0,63.8,64.0,64.1,64.2,64.3],churn:[26.0,27.2,28.0,29.0,30.5,31.2,31.8,32.4,32.6,32.8,32.9,33.0]}}
 };
+var COHORT_SEG_DAY={
+  act:[{label:'1월 활성',vals:[58,50,45,41,36,32]},{label:'2월 활성',vals:[60,52,47,43,38,null]},{label:'3월 활성',vals:[62,54,49,45,null,null]},{label:'4월 활성',vals:[59,51,46,null,null,null]}],
+  new:[{label:'1월 신규',vals:[32,25,20,17,14,11]},{label:'2월 신규',vals:[34,27,22,19,16,null]},{label:'3월 신규',vals:[36,29,24,20,null,null]},{label:'4월 신규',vals:[33,26,21,null,null,null]}],
+  churn:[{label:'1월 윈백',vals:[22,16,13,10,8,6]},{label:'2월 윈백',vals:[23,17,14,11,9,null]},{label:'3월 윈백',vals:[24,18,15,12,null,null]},{label:'4월 윈백',vals:[21,15,12,null,null,null]}]
+};
+var cohortSeg='act',cohortType='week';
+var COHORT_NOTICES={new:'첫 주문 전환은 제외 · 재구매부터 측정',churn:'윈백 캠페인 전환 유저 기준 · 재이탈 여부 추적'};
+var COHORT_PALETTES={act:'green',new:'blue',churn:'coral'};
 Chart.defaults.color='#6b6b80';
 Chart.defaults.borderColor='rgba(255,255,255,0.05)';
+var tooltipStyle={backgroundColor:'rgba(20,20,30,0.95)',titleColor:'#fff',bodyColor:'#a0a0b8',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,cornerRadius:10,padding:12,mode:'index'};
 function ccol(v){
+  if(v>=40)return{bg:'rgba(52,211,153,0.18)',tx:'#34d399'};
+  if(v>=25)return{bg:'rgba(251,191,36,0.18)',tx:'#fbbf24'};
+  return{bg:'rgba(248,113,113,0.18)',tx:'#f87171'};
+}
+function ndayCol(v){
+  if(v>=50)return{bg:'rgba(167,139,250,0.25)',tx:'#c4b5fd'};
   if(v>=40)return{bg:'rgba(52,211,153,0.18)',tx:'#34d399'};
   if(v>=25)return{bg:'rgba(251,191,36,0.18)',tx:'#fbbf24'};
   return{bg:'rgba(248,113,113,0.18)',tx:'#f87171'};
@@ -286,11 +359,46 @@ function buildCohortLine(canvasId,legendId,cohorts,palette){
   charts[canvasId]=new Chart(document.getElementById(canvasId),{
     type:'line',
     data:{labels:WEEKS,datasets:cohorts.map(function(c,i){return{label:c.label,data:c.vals,borderColor:colors[i%colors.length],backgroundColor:'transparent',borderWidth:2.5,pointRadius:4,pointBackgroundColor:colors[i%colors.length],pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,spanGaps:false};})},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(20,20,30,0.95)',titleColor:'#fff',bodyColor:'#a0a0b8',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,cornerRadius:10,padding:12,mode:'index',callbacks:{label:function(c){return c.dataset.label+(c.parsed.y!==null?': '+c.parsed.y+'%':'');}}}},scales:{x:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'}}},y:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'},callback:function(v){return v+'%'}},min:0,max:70}}}
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:Object.assign({},tooltipStyle,{callbacks:{label:function(c){return c.dataset.label+(c.parsed.y!==null?': '+c.parsed.y+'%':'');}}})},scales:{x:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'}}},y:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'},callback:function(v){return v+'%'}},min:0,max:80}}}
   });
   var leg=document.getElementById(legendId);
   if(leg){leg.innerHTML='';cohorts.forEach(function(c,i){var d=document.createElement('div');d.className='li';d.innerHTML='<div class="ldash" style="background:'+colors[i%colors.length]+'"></div>'+c.label;leg.appendChild(d);});}
 }
+
+/* === Sub-tab switching === */
+function swSub(group,mode,el){
+  currentSubMode[group]=mode;
+  var parent=el.parentElement;
+  parent.querySelectorAll('.stab').forEach(function(t){t.classList.remove('active');});
+  el.classList.add('active');
+  var card=parent.parentElement;
+  card.querySelectorAll(':scope > .stab-content, :scope > * > .stab-content').forEach(function(c){
+    var id=c.id;
+    if(id.indexOf(group+'-')===0){
+      c.classList.toggle('active',id===group+'-'+mode);
+    }
+  });
+  // Lazy build visit data
+  setTimeout(function(){drawSubContent(group,mode);},80);
+}
+function drawSubContent(group,mode){
+  if(mode==='order')return; // order data already built
+  var p=PERIOD[currentPeriod];
+  if(group==='matrix'){
+    var key='all-visit';
+    makeTbl('tbl-all-visit',[{label:'1월',vals:[null,68,60,54,49,43,38]},{label:'2월',vals:[null,70,62,56,51,45,40]},{label:'3월',vals:[null,72,64,58,53,47,-1]},{label:'4월',vals:[null,69,61,55,50,-1,-1]},{label:'5월',vals:[null,71,63,-1,-1,-1,-1]},{label:'6월',vals:[null,70,-1,-1,-1,-1,-1]}],['W0','W1','W2','W3','W4','W5','W6']);
+    buildCohortLine('c-cohort-all-visit','leg-cohort-all-visit',COHORT_DATA[key],'blue');
+  }
+  if(group==='nday'){
+    renderNdayTbl();
+  }
+  if(group==='seg-trend'){
+    if(!charts['c-seg-visit']){
+      charts['c-seg-visit']=new Chart(document.getElementById('c-seg-visit'),{type:'line',data:{labels:p.months,datasets:[{label:'0회 출신',data:p.segVisit.new,borderColor:'#60a5fa',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#60a5fa',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},{label:'활성패써',data:p.segVisit.active,borderColor:'#34d399',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#34d399',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},{label:'이탈패써(윈백 후)',data:p.segVisit.churn,borderColor:'#fb923c',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#fb923c',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5,borderDash:[4,3]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:tooltipStyle},scales:{x:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'}}},y:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'},callback:function(v){return v+'%'}},min:20,max:70}}}});
+    }
+  }
+}
+
 function setPeriod(el,months){
   document.querySelectorAll('.ftab').forEach(function(t){t.classList.remove('active');});
   el.classList.add('active');currentPeriod=months;
@@ -305,6 +413,7 @@ function setPeriod(el,months){
   document.getElementById('sc-ret-sub').innerHTML=p.retSub;
   if(charts['c-population']){charts['c-population'].data.labels=p.months;charts['c-population'].data.datasets[0].data=p.pop.active;charts['c-population'].data.datasets[1].data=p.pop.churn;charts['c-population'].data.datasets[2].data=p.pop.new;charts['c-population'].update();}
   if(charts['c-seg']){charts['c-seg'].data.labels=p.months;charts['c-seg'].data.datasets[0].data=p.seg.new;charts['c-seg'].data.datasets[1].data=p.seg.active;charts['c-seg'].data.datasets[2].data=p.seg.churn;charts['c-seg'].update();}
+  if(charts['c-seg-visit']){charts['c-seg-visit'].data.labels=p.months;charts['c-seg-visit'].data.datasets[0].data=p.segVisit.new;charts['c-seg-visit'].data.datasets[1].data=p.segVisit.active;charts['c-seg-visit'].data.datasets[2].data=p.segVisit.churn;charts['c-seg-visit'].update();}
 }
 function sw(el,tab){
   document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
@@ -312,12 +421,7 @@ function sw(el,tab){
   ['all','seg'].forEach(function(t){document.getElementById('tab-'+t).style.display=t===tab?'':'none';});
   setTimeout(function(){draw(tab);},80);
 }
-function ndayCol(v){
-  if(v>=50)return{bg:'rgba(167,139,250,0.25)',tx:'#c4b5fd'};
-  if(v>=40)return{bg:'rgba(52,211,153,0.18)',tx:'#34d399'};
-  if(v>=25)return{bg:'rgba(251,191,36,0.18)',tx:'#fbbf24'};
-  return{bg:'rgba(248,113,113,0.18)',tx:'#f87171'};
-}
+
 function toggleNday(day,el){
   var idx=NDAY_SELECTED.indexOf(day);
   if(idx>-1){if(NDAY_SELECTED.length<=1)return;NDAY_SELECTED.splice(idx,1);el.classList.remove('active');}
@@ -325,11 +429,14 @@ function toggleNday(day,el){
   renderNdayTbl();
 }
 function renderNdayTbl(){
-  var wrap=document.getElementById('tbl-nday');wrap.innerHTML='';
+  var mode=currentSubMode['nday']||'order';
+  var tblId=mode==='order'?'tbl-nday':'tbl-nday-visit';
+  var wrap=document.getElementById(tblId);wrap.innerHTML='';
+  var cohorts=NDAY_COHORTS[mode];
   var t=document.createElement('table');t.className='ctbl';
   var h='<tr><th>코호트</th>';NDAY_SELECTED.forEach(function(d){h+='<th>D'+d+'</th>';});h+='</tr>';
   t.innerHTML=h;
-  NDAY_COHORTS.forEach(function(r){
+  cohorts.forEach(function(r){
     var tr=document.createElement('tr');
     var html='<td>'+r.label+'</td>';
     NDAY_SELECTED.forEach(function(d){
@@ -340,6 +447,95 @@ function renderNdayTbl(){
     tr.innerHTML=html;t.appendChild(tr);
   });
   wrap.appendChild(t);
+  // Also rebuild the other mode table if it was built before
+  var otherMode=mode==='order'?'visit':'order';
+  var otherTblId=otherMode==='order'?'tbl-nday':'tbl-nday-visit';
+  var otherWrap=document.getElementById(otherTblId);
+  if(otherWrap && otherWrap.children.length>0){
+    otherWrap.innerHTML='';
+    var cohorts2=NDAY_COHORTS[otherMode];
+    var t2=document.createElement('table');t2.className='ctbl';
+    var h2='<tr><th>코호트</th>';NDAY_SELECTED.forEach(function(d){h2+='<th>D'+d+'</th>';});h2+='</tr>';
+    t2.innerHTML=h2;
+    cohorts2.forEach(function(r){
+      var tr=document.createElement('tr');
+      var html='<td>'+r.label+'</td>';
+      NDAY_SELECTED.forEach(function(d){
+        var v=r.data[d];
+        if(v===null||v===undefined){html+='<td style="color:#3a3a4a">—</td>';return;}
+        var c=ndayCol(v);html+='<td style="background:'+c.bg+';color:'+c.tx+';font-weight:600">'+v+'%</td>';
+      });
+      tr.innerHTML=html;t2.appendChild(tr);
+    });
+    otherWrap.appendChild(t2);
+  }
+}
+function swCohortFilter(filterType,val,el){
+  var parent=el.parentElement;
+  parent.querySelectorAll('.stab').forEach(function(t){t.classList.remove('active');});
+  el.classList.add('active');
+  if(filterType==='seg')cohortSeg=val;
+  if(filterType==='type')cohortType=val;
+  renderCohortUnified();
+}
+function renderCohortUnified(){
+  // Notice
+  var noticeEl=document.getElementById('cohort-notice');
+  if(COHORT_NOTICES[cohortSeg]){noticeEl.style.display='';noticeEl.textContent=COHORT_NOTICES[cohortSeg];}
+  else{noticeEl.style.display='none';}
+  // Table
+  var wrap=document.getElementById('tbl-cohort-unified');wrap.innerHTML='';
+  var isDay=cohortType==='day';
+  var weeks=isDay?['D1','D3','D7','D14','D30','D60']:['W0','W1','W2','W3','W4','W5','W6'];
+  var dataKey=cohortSeg;
+  var rows;
+  if(isDay){
+    rows=COHORT_SEG_DAY[dataKey];
+    var t=document.createElement('table');t.className='ctbl';
+    var h='<tr><th>코호트</th>';['D1','D3','D7','D14','D30','D60'].forEach(function(w){h+='<th>'+w+'</th>';});h+='</tr>';
+    t.innerHTML=h;
+    rows.forEach(function(r){
+      var tr=document.createElement('tr');
+      var html='<td>'+r.label+'</td>';
+      r.vals.forEach(function(v){
+        if(v===null||v===-1){html+='<td style="color:#3a3a4a">—</td>';return;}
+        var c=ccol(v);html+='<td style="background:'+c.bg+';color:'+c.tx+';font-weight:600">'+v+'%</td>';
+      });
+      tr.innerHTML=html;t.appendChild(tr);
+    });
+    wrap.appendChild(t);
+  } else {
+    rows=COHORT_DATA[dataKey];
+    var tblRows=rows.map(function(r){return{label:r.label,vals:[null].concat(r.vals)};});
+    var t=document.createElement('table');t.className='ctbl';
+    var h='<tr><th>코호트</th>';weeks.forEach(function(w){h+='<th>'+w+'</th>';});h+='</tr>';
+    t.innerHTML=h;
+    tblRows.forEach(function(r){
+      var tr=document.createElement('tr');
+      var html='<td>'+r.label+'</td>';
+      r.vals.forEach(function(v,i){
+        if(i===0){html+='<td style="background:rgba(255,255,255,0.04);color:#6b6b80;font-size:11px">기준</td>';return;}
+        if(v===-1||v===null){html+='<td style="color:#3a3a4a">—</td>';return;}
+        var c=ccol(v);html+='<td style="background:'+c.bg+';color:'+c.tx+';font-weight:600">'+v+'%</td>';
+      });
+      tr.innerHTML=html;t.appendChild(tr);
+    });
+    wrap.appendChild(t);
+  }
+  // Chart
+  var canvasId='c-cohort-unified';
+  if(charts[canvasId]){charts[canvasId].destroy();delete charts[canvasId];}
+  var chartData=isDay?COHORT_SEG_DAY[dataKey]:COHORT_DATA[dataKey];
+  var labels=isDay?['D1','D3','D7','D14','D30','D60']:WEEKS;
+  var palette=COHORT_PALETTES[cohortSeg];
+  var colors=PALETTES[palette];
+  charts[canvasId]=new Chart(document.getElementById(canvasId),{
+    type:'line',
+    data:{labels:labels,datasets:chartData.map(function(c,i){return{label:c.label,data:c.vals,borderColor:colors[i%colors.length],backgroundColor:'transparent',borderWidth:2.5,pointRadius:4,pointBackgroundColor:colors[i%colors.length],pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,spanGaps:false};})},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:Object.assign({},tooltipStyle,{callbacks:{label:function(c){return c.dataset.label+(c.parsed.y!==null?': '+c.parsed.y+'%':'');}}})},scales:{x:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'}}},y:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'},callback:function(v){return v+'%'}},min:0,max:80}}}
+  });
+  var leg=document.getElementById('leg-cohort-unified');
+  leg.innerHTML='';chartData.forEach(function(c,i){var d=document.createElement('div');d.className='li';d.innerHTML='<div class="ldash" style="background:'+colors[i%colors.length]+'"></div>'+c.label;leg.appendChild(d);});
 }
 function buildNday(){
   var opts=document.getElementById('nday-options');
@@ -362,16 +558,11 @@ function draw(tab){
   }
   if(tab==='seg'){
     if(!charts['c-population']){
-      charts['c-population']=new Chart(document.getElementById('c-population'),{type:'line',data:{labels:p.months,datasets:[{label:'활성패써',data:p.pop.active,borderColor:'#34d399',backgroundColor:'rgba(52,211,153,0.08)',fill:true,pointRadius:4,pointBackgroundColor:'#34d399',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},{label:'이탈패써',data:p.pop.churn,borderColor:'#fb923c',backgroundColor:'rgba(251,146,60,0.08)',fill:true,pointRadius:4,pointBackgroundColor:'#fb923c',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},{label:'0회 출신',data:p.pop.new,borderColor:'#60a5fa',backgroundColor:'rgba(96,165,250,0.08)',fill:true,pointRadius:4,pointBackgroundColor:'#60a5fa',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(20,20,30,0.95)',titleColor:'#fff',bodyColor:'#a0a0b8',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,cornerRadius:10,padding:12,mode:'index',callbacks:{label:function(c){return c.dataset.label+': '+c.parsed.y.toLocaleString()+'명';}}}},scales:{x:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'}}},y:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'},callback:function(v){return Math.round(v/10000)+'만';}},min:0}}}});
+      charts['c-population']=new Chart(document.getElementById('c-population'),{type:'line',data:{labels:p.months,datasets:[{label:'활성패써',data:p.pop.active,borderColor:'#34d399',backgroundColor:'rgba(52,211,153,0.08)',fill:true,pointRadius:4,pointBackgroundColor:'#34d399',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},{label:'이탈패써',data:p.pop.churn,borderColor:'#fb923c',backgroundColor:'rgba(251,146,60,0.08)',fill:true,pointRadius:4,pointBackgroundColor:'#fb923c',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},{label:'0회 출신',data:p.pop.new,borderColor:'#60a5fa',backgroundColor:'rgba(96,165,250,0.08)',fill:true,pointRadius:4,pointBackgroundColor:'#60a5fa',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:Object.assign({},tooltipStyle,{callbacks:{label:function(c){return c.dataset.label+': '+c.parsed.y.toLocaleString()+'명';}}})},scales:{x:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'}}},y:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'},callback:function(v){return Math.round(v/10000)+'만';}},min:0}}}});
     }
-    makeTbl('tbl-new',[{label:'1월 신규',vals:[null,28,22,18,15,12,10]},{label:'2월 신규',vals:[null,30,24,20,17,14,-1]},{label:'3월 신규',vals:[null,32,26,22,18,-1,-1]},{label:'4월 신규',vals:[null,29,23,19,-1,-1,-1]}],['W0','W1','W2','W3','W4','W5','W6']);
-    buildCohortLine('c-cohort-new','leg-cohort-new',COHORT_DATA.new,'blue');
-    makeTbl('tbl-act',[{label:'1월 활성',vals:[null,55,47,42,38,33,29]},{label:'2월 활성',vals:[null,57,49,44,40,35,-1]},{label:'3월 활성',vals:[null,59,51,46,42,-1,-1]},{label:'4월 활성',vals:[null,56,48,43,-1,-1,-1]}],['W0','W1','W2','W3','W4','W5','W6']);
-    buildCohortLine('c-cohort-act','leg-cohort-act',COHORT_DATA.act,'green');
-    makeTbl('tbl-churn',[{label:'1월 윈백',vals:[null,19,14,11,9,7,5]},{label:'2월 윈백',vals:[null,20,15,12,10,8,-1]},{label:'3월 윈백',vals:[null,21,16,13,11,-1,-1]},{label:'4월 윈백',vals:[null,18,14,11,-1,-1,-1]}],['W0','W1','W2','W3','W4','W5','W6']);
-    buildCohortLine('c-cohort-churn','leg-cohort-churn',COHORT_DATA.churn,'coral');
+    renderCohortUnified();
     if(!charts['c-seg']){
-      charts['c-seg']=new Chart(document.getElementById('c-seg'),{type:'line',data:{labels:p.months,datasets:[{label:'0회 출신',data:p.seg.new,borderColor:'#60a5fa',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#60a5fa',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},{label:'활성패써',data:p.seg.active,borderColor:'#34d399',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#34d399',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},{label:'이탈패써(윈백 후)',data:p.seg.churn,borderColor:'#fb923c',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#fb923c',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5,borderDash:[4,3]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(20,20,30,0.95)',titleColor:'#fff',bodyColor:'#a0a0b8',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,cornerRadius:10,padding:12,mode:'index'}},scales:{x:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'}}},y:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'},callback:function(v){return v+'%'}},min:10,max:55}}}});
+      charts['c-seg']=new Chart(document.getElementById('c-seg'),{type:'line',data:{labels:p.months,datasets:[{label:'0회 출신',data:p.seg.new,borderColor:'#60a5fa',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#60a5fa',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},{label:'활성패써',data:p.seg.active,borderColor:'#34d399',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#34d399',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},{label:'이탈패써(윈백 후)',data:p.seg.churn,borderColor:'#fb923c',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#fb923c',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5,borderDash:[4,3]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:tooltipStyle},scales:{x:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'}}},y:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'},callback:function(v){return v+'%'}},min:10,max:55}}}});
     }
   }
 }
