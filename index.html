@@ -33,7 +33,7 @@ body{background:#0a0a0f;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Se
 .tab.active{background:rgba(96,165,250,0.15);color:#60a5fa;border:1px solid rgba(96,165,250,0.3);box-shadow:0 2px 12px rgba(96,165,250,0.15)}
 .tab svg{width:16px;height:16px;flex-shrink:0}
 
-/* Sub tabs (주문/방문) */
+/* Sub tabs */
 .sub-tabs{display:flex;gap:4px;margin-bottom:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:3px;width:fit-content}
 .stab{padding:6px 16px;font-size:11px;font-weight:500;border-radius:7px;cursor:pointer;border:1px solid transparent;background:transparent;color:#6b6b80;transition:all 0.2s ease;font-family:inherit;display:flex;align-items:center;gap:5px}
 .stab:hover{color:#a0a0b8}
@@ -75,6 +75,12 @@ body{background:#0a0a0f;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Se
 .ctbl tr td:first-child{text-align:left;color:#6b6b80;font-size:11px;padding-right:12px;font-weight:500}
 .ctbl tr td:first-child:hover{transform:none}
 
+/* Week label with date range tooltip */
+.wk-label{position:relative;cursor:default;white-space:nowrap}
+.wk-label .wk-range{display:none;position:absolute;left:calc(100% + 6px);top:50%;transform:translateY(-50%);background:rgba(20,20,35,0.97);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:4px 10px;font-size:10px;color:#a0a0b8;white-space:nowrap;z-index:10;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+.wk-label:hover .wk-range{display:block}
+.wk-label:hover{color:#e8e8ed!important}
+
 /* Segment labels */
 .seg-label{font-size:11px;font-weight:600;padding:5px 12px;border-radius:8px;display:inline-block;white-space:nowrap;letter-spacing:0.3px}
 
@@ -89,7 +95,7 @@ body{background:#0a0a0f;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Se
 .nday-opt:hover{border-color:rgba(167,139,250,0.3);color:#a0a0b8}
 .nday-opt.active{background:rgba(167,139,250,0.15);color:#c4b5fd;border-color:rgba(167,139,250,0.4)}
 
-/* Glow effects for summary cards */
+/* Glow effects */
 .sc:nth-child(1){box-shadow:0 0 40px rgba(99,140,255,0.04)}
 .sc:nth-child(2){box-shadow:0 0 40px rgba(52,211,153,0.04)}
 .sc:nth-child(3){box-shadow:0 0 40px rgba(168,85,247,0.04)}
@@ -157,7 +163,7 @@ body{background:#0a0a0f;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Se
   <!-- 전체 코호트 리텐션 매트릭스 -->
   <div class="card">
     <div class="ct">전체 코호트 리텐션 매트릭스</div>
-    <div class="cs" id="matrix-sub">첫 구매월 기준 · 최근 6개월 코호트</div>
+    <div class="cs" id="matrix-sub">첫 구매주 기준 · 최근 10주 코호트</div>
     <div class="sub-tabs" id="stabs-matrix">
       <button class="stab active" onclick="swSub('matrix','order',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>주문 리텐션</button>
       <button class="stab" onclick="swSub('matrix','visit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>방문 리텐션</button>
@@ -177,11 +183,11 @@ body{background:#0a0a0f;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Se
     <div class="ct">코호트별 리텐션 곡선</div>
     <div class="cs">가로축: 첫 구매 후 주차 · 세로축: 재구매율 · 선: 각 코호트</div>
     <div id="curve-order" class="stab-content active">
-      <div style="position:relative;height:240px"><canvas id="c-cohort-all"></canvas></div>
+      <div style="position:relative;height:260px"><canvas id="c-cohort-all"></canvas></div>
       <div class="legend" id="leg-cohort-all"></div>
     </div>
     <div id="curve-visit" class="stab-content">
-      <div style="position:relative;height:240px"><canvas id="c-cohort-all-visit"></canvas></div>
+      <div style="position:relative;height:260px"><canvas id="c-cohort-all-visit"></canvas></div>
       <div class="legend" id="leg-cohort-all-visit"></div>
     </div>
   </div>
@@ -189,7 +195,7 @@ body{background:#0a0a0f;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Se
   <!-- N-Day 리텐션 히트맵 -->
   <div class="card">
     <div class="ct">N-Day 리텐션 히트맵</div>
-    <div class="cs">첫 구매월 기준 코호트 · 특정 경과일 시점의 재구매율</div>
+    <div class="cs">첫 구매주 기준 코호트 · 특정 경과일 시점의 재구매율</div>
     <div class="sub-tabs" id="stabs-nday">
       <button class="stab active" onclick="swSub('nday','order',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>주문 리텐션</button>
       <button class="stab" onclick="swSub('nday','visit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>방문 리텐션</button>
@@ -229,7 +235,7 @@ body{background:#0a0a0f;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Se
   <!-- 세그먼트별 W1 리텐션 추이 비교 -->
   <div class="card">
     <div class="ct">세그먼트별 W1 리텐션 추이 비교</div>
-    <div class="cs" id="seg-sub">코호트 기준 · W1(첫 주) 재구매율 · 최근 6개월</div>
+    <div class="cs" id="seg-sub">주간 코호트 기준 · W1(첫 주) 재구매율</div>
     <div class="sub-tabs" id="stabs-seg-trend">
       <button class="stab active" onclick="swSub('seg-trend','order',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>주문 리텐션</button>
       <button class="stab" onclick="swSub('seg-trend','visit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>방문 리텐션</button>
@@ -275,63 +281,154 @@ body{background:#0a0a0f;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Se
 </div>
 
 <script>
-var charts={},built={},currentPeriod=6,currentSubMode={};
-var tSec='#6b6b80',grid='rgba(255,255,255,0.05)';
-var WEEKS=['W1','W2','W3','W4','W5','W6'];
-var PALETTES={
-  blue:['#1e40af','#2563eb','#3b82f6','#60a5fa','#93c5fd','#bfdbfe'],
-  green:['#065f46','#059669','#10b981','#34d399','#6ee7b7','#a7f3d0'],
-  coral:['#9a3412','#c2410c','#ea580c','#fb923c','#fdba74','#fed7aa']
-};
-var NDAY_ALL_DAYS=[1,2,3,4,5,6,7,10,14,21,30];
-var NDAY_SELECTED=[1,2,3,4,5,6,7,14];
-
-/* === 주문 리텐션 데이터 === */
-var NDAY_COHORTS={
-  order:[
-    {label:'1월',data:{1:65,2:61,3:58,4:56,5:54,6:51,7:48,10:43,14:38,21:33,30:28}},
-    {label:'2월',data:{1:63,2:60,3:57,4:55,5:52,6:50,7:47,10:42,14:37,21:32,30:27}},
-    {label:'3월',data:{1:66,2:63,3:59,4:57,5:55,6:52,7:49,10:44,14:39,21:34,30:29}},
-    {label:'4월',data:{1:61,2:58,3:55,4:53,5:50,6:48,7:45,10:40,14:36,21:31,30:null}},
-    {label:'5월',data:{1:64,2:61,3:57,4:55,5:53,6:50,7:47,10:42,14:37,21:null,30:null}},
-    {label:'6월',data:{1:62,2:59,3:55,4:53,5:51,6:48,7:null,10:null,14:null,21:null,30:null}}
-  ],
-  visit:[
-    {label:'1월',data:{1:78,2:74,3:71,4:69,5:67,6:65,7:62,10:57,14:52,21:46,30:41}},
-    {label:'2월',data:{1:76,2:73,3:69,4:67,5:65,6:63,7:60,10:55,14:50,21:44,30:39}},
-    {label:'3월',data:{1:79,2:75,3:72,4:70,5:68,6:66,7:63,10:58,14:53,21:47,30:42}},
-    {label:'4월',data:{1:74,2:71,3:67,4:65,5:63,6:61,7:58,10:53,14:49,21:43,30:null}},
-    {label:'5월',data:{1:77,2:73,3:70,4:68,5:66,6:64,7:61,10:56,14:51,21:null,30:null}},
-    {label:'6월',data:{1:75,2:72,3:68,4:66,5:64,6:62,7:null,10:null,14:null,21:null,30:null}}
-  ]
-};
-var COHORT_DATA={
-  all:[{label:'1월',vals:[51,43,37,33,28,25]},{label:'2월',vals:[53,45,39,35,30,27]},{label:'3월',vals:[55,47,41,37,32,null]},{label:'4월',vals:[52,44,38,34,null,null]},{label:'5월',vals:[54,46,null,null,null,null]},{label:'6월',vals:[53,null,null,null,null,null]}],
-  'all-visit':[{label:'1월',vals:[68,60,54,49,43,38]},{label:'2월',vals:[70,62,56,51,45,40]},{label:'3월',vals:[72,64,58,53,47,null]},{label:'4월',vals:[69,61,55,50,null,null]},{label:'5월',vals:[71,63,null,null,null,null]},{label:'6월',vals:[70,null,null,null,null,null]}],
-  new:[{label:'1주차',vals:[28,22,18,15,12,10]},{label:'2주차',vals:[30,24,20,17,14,null]},{label:'3주차',vals:[32,26,22,18,null,null]},{label:'4주차',vals:[29,23,19,null,null,null]},{label:'5주차',vals:[27,21,null,null,null,null]},{label:'6주차',vals:[28,null,null,null,null,null]}],
-  'new-visit':[{label:'1주차',vals:[45,38,32,27,23,19]},{label:'2주차',vals:[47,40,34,29,25,null]},{label:'3주차',vals:[49,42,36,31,null,null]},{label:'4주차',vals:[46,39,33,null,null,null]},{label:'5주차',vals:[44,37,null,null,null,null]},{label:'6주차',vals:[45,null,null,null,null,null]}],
-  act:[{label:'1주차',vals:[55,47,42,38,33,29]},{label:'2주차',vals:[57,49,44,40,35,null]},{label:'3주차',vals:[59,51,46,42,null,null]},{label:'4주차',vals:[56,48,43,null,null,null]},{label:'5주차',vals:[54,46,null,null,null,null]},{label:'6주차',vals:[53,null,null,null,null,null]}],
-  'act-visit':[{label:'1주차',vals:[72,65,59,54,48,43]},{label:'2주차',vals:[74,67,61,56,50,null]},{label:'3주차',vals:[76,69,63,58,null,null]},{label:'4주차',vals:[73,66,60,null,null,null]},{label:'5주차',vals:[71,63,null,null,null,null]},{label:'6주차',vals:[70,null,null,null,null,null]}],
-  churn:[{label:'1주차',vals:[19,14,11,9,7,5]},{label:'2주차',vals:[20,15,12,10,8,null]},{label:'3주차',vals:[21,16,13,11,null,null]},{label:'4주차',vals:[18,14,11,null,null,null]},{label:'5주차',vals:[17,13,null,null,null,null]},{label:'6주차',vals:[19,null,null,null,null,null]}],
-  'churn-visit':[{label:'1주차',vals:[35,28,23,19,15,12]},{label:'2주차',vals:[36,29,24,20,16,null]},{label:'3주차',vals:[37,30,25,21,null,null]},{label:'4주차',vals:[34,27,22,null,null,null]},{label:'5주차',vals:[33,26,null,null,null,null]},{label:'6주차',vals:[35,null,null,null,null,null]}]
-};
-var PERIOD={
-  6:{badge:'2025년 1–6월',mosuSub:'이전 6개월 98,240명 / <span class="up">▲ +14.1%</span>',cycleSub:'이전 6개월 대비 <span class="up">▲ 0.8일 단축</span>',retVal:'38.4%',retSub:'이전 6개월 대비 <span class="up">▲ 2.1%p 상승</span>',cycleValVisit:'3.2일',cycleSubVisit:'이전 6개월 대비 <span class="up">▲ 0.3일 단축</span>',retValVisit:'54.7%',retSubVisit:'이전 6개월 대비 <span class="up">▲ 1.8%p 상승</span>',months:['1월','2월','3월','4월','5월','6월'],pop:{active:[80100,82400,84000,85500,86900,89240],churn:[44500,43800,43100,42500,41700,41520],new:[22300,23000,23800,24100,24400,24810]},seg:{new:[28,30,32,29,27,28],active:[55,57,59,56,54,53],churn:[19,20,21,18,17,19]},segVisit:{new:[45,47,49,46,44,45],active:[72,74,76,73,71,70],churn:[35,36,37,34,33,35]}},
-  12:{badge:'2024년 7월–2025년 6월',mosuSub:'이전 12개월 81,400명 / <span class="up">▲ +37.7%</span>',cycleSub:'이전 12개월 대비 <span class="up">▲ 1.4일 단축</span>',retVal:'35.8%',retSub:'이전 12개월 대비 <span class="up">▲ 3.4%p 상승</span>',cycleValVisit:'3.5일',cycleSubVisit:'이전 12개월 대비 <span class="up">▲ 0.5일 단축</span>',retValVisit:'52.1%',retSubVisit:'이전 12개월 대비 <span class="up">▲ 2.9%p 상승</span>',months:['7월','8월','9월','10월','11월','12월','1월','2월','3월','4월','5월','6월'],pop:{active:[60000,63000,66000,69000,72000,76000,80000,84000,86000,87000,88000,89240],churn:[54000,52000,50000,48000,46000,44000,43000,42500,42100,41800,41600,41520],new:[12000,14000,16000,18000,20000,22000,23000,24000,24400,24600,24700,24810]},seg:{new:[22,23,25,26,27,28,30,32,29,27,28,28],active:[48,49,51,52,53,55,57,59,56,54,53,55],churn:[14,15,16,17,18,19,20,21,18,17,19,18]},segVisit:{new:[38,39,41,42,43,45,47,49,46,44,45,45],active:[64,66,67,69,70,72,74,76,73,71,70,72],churn:[28,29,31,32,33,35,36,37,34,33,35,34]}}
-};
-var COHORT_SEG_DAY_COLS=['D1','D2','D3','D4','D5','D6','D7','D14'];
-var COHORT_SEG_DAY={
-  act:[{label:'1주차',vals:[58,55,52,50,48,46,45,38]},{label:'2주차',vals:[60,57,54,52,50,48,47,40]},{label:'3주차',vals:[62,59,56,54,52,50,49,42]},{label:'4주차',vals:[59,56,53,51,49,47,46,null]},{label:'5주차',vals:[57,54,51,49,47,45,44,null]},{label:'6주차',vals:[58,55,52,50,48,46,null,null]}],
-  new:[{label:'1주차',vals:[32,29,26,24,22,21,20,15]},{label:'2주차',vals:[34,31,28,26,24,23,22,17]},{label:'3주차',vals:[36,33,30,28,26,25,24,19]},{label:'4주차',vals:[33,30,27,25,23,22,21,null]},{label:'5주차',vals:[31,28,25,23,21,20,19,null]},{label:'6주차',vals:[32,29,26,24,22,21,null,null]}],
-  churn:[{label:'1주차',vals:[22,19,17,15,14,13,13,9]},{label:'2주차',vals:[23,20,18,16,15,14,14,10]},{label:'3주차',vals:[24,21,19,17,16,15,15,11]},{label:'4주차',vals:[21,18,16,14,13,12,12,null]},{label:'5주차',vals:[20,17,15,13,12,11,11,null]},{label:'6주차',vals:[22,19,17,15,14,13,null,null]}]
-};
+/* ============================================================
+   CONFIG & STATE
+   ============================================================ */
+var charts={},currentPeriod=6,currentSubMode={};
 var cohortSeg='act',cohortType='week';
+var tSec='#6b6b80',grid='rgba(255,255,255,0.05)';
+var ELAPSED_WEEKS=['W1','W2','W3','W4','W5','W6'];
+var NDAY_ALL_DAYS=[1,2,3,4,5,6,7,10,14,21,30];
+var NDAY_SELECTED=[1,3,5,7,14];
+var CURRENT_WEEK=26; // 현재 2025-W26 기준
+
+/* ============================================================
+   WEEK DEFINITIONS (2025 ISO weeks, Monday start)
+   ============================================================ */
+var WEEK_RANGE={
+  'W01':'12/30~1/5','W02':'1/6~1/12','W03':'1/13~1/19','W04':'1/20~1/26',
+  'W05':'1/27~2/2','W06':'2/3~2/9','W07':'2/10~2/16','W08':'2/17~2/23',
+  'W09':'2/24~3/2','W10':'3/3~3/9','W11':'3/10~3/16','W12':'3/17~3/23',
+  'W13':'3/24~3/30','W14':'3/31~4/6','W15':'4/7~4/13','W16':'4/14~4/20',
+  'W17':'4/21~4/27','W18':'4/28~5/4','W19':'5/5~5/11','W20':'5/12~5/18',
+  'W21':'5/19~5/25','W22':'5/26~6/1','W23':'6/2~6/8','W24':'6/9~6/15',
+  'W25':'6/16~6/22'
+};
+// 전체 코호트 주차 풀 (16주: W10~W25)
+var ALL_WEEKS=['W10','W11','W12','W13','W14','W15','W16','W17','W18','W19','W20','W21','W22','W23','W24','W25'];
+
+function wn(w){return parseInt(w.substring(1));}
+function wLabel(w){return '2025-'+w;}
+function wRange(w){return WEEK_RANGE[w]||'';}
+
+/* ============================================================
+   DATA GENERATION HELPERS
+   ============================================================ */
+// 코호트별 오프셋 패턴 (변동성 부여)
+var OFF=[-1,2,-2,1,3,-1,0,2,-2,1,2,-1,1,0,-2,0];
+
+// 주간 코호트 리텐션 데이터 생성 (경과 주 W1~W6)
+function genCohort(weeks,base,offsets){
+  return weeks.map(function(w,i){
+    var avail=Math.min(base.length,CURRENT_WEEK-wn(w));
+    var o=offsets[i%offsets.length];
+    return{w:w,vals:base.map(function(v,j){return j<avail?Math.max(0,v+o):null;})};
+  });
+}
+
+// N-Day 리텐션 데이터 생성
+function genNday(weeks,baseObj,offsets){
+  return weeks.map(function(w,i){
+    var days=(CURRENT_WEEK-wn(w))*7;
+    var o=offsets[i%offsets.length];
+    var data={};
+    NDAY_ALL_DAYS.forEach(function(d){data[d]=d<=days?Math.max(0,baseObj[d]+o):null;});
+    return{w:w,data:data};
+  });
+}
+
+// Day-level 세그먼트 코호트 데이터 생성
+var DAY_COLS=['D1','D2','D3','D4','D5','D6','D7','D14'];
+var DAY_NUMS=[1,2,3,4,5,6,7,14];
+function genDayCohort(weeks,base,offsets){
+  return weeks.map(function(w,i){
+    var days=(CURRENT_WEEK-wn(w))*7;
+    var o=offsets[i%offsets.length];
+    return{w:w,vals:DAY_NUMS.map(function(d,j){return d<=days?Math.max(0,base[j]+o):null;})};
+  });
+}
+
+/* ============================================================
+   COHORT DATA (ALL 16 WEEKS, sliced per period)
+   ============================================================ */
+var COHORT={
+  'all-order':    genCohort(ALL_WEEKS,[53,45,39,35,30,27],OFF),
+  'all-visit':    genCohort(ALL_WEEKS,[70,62,56,51,45,40],OFF),
+  'act-order':    genCohort(ALL_WEEKS,[56,48,43,39,34,30],OFF),
+  'act-visit':    genCohort(ALL_WEEKS,[73,66,60,55,49,44],OFF),
+  'new-order':    genCohort(ALL_WEEKS,[29,23,19,16,13,11],OFF),
+  'new-visit':    genCohort(ALL_WEEKS,[46,39,33,28,24,20],OFF),
+  'churn-order':  genCohort(ALL_WEEKS,[19,14,11,9,7,5],    OFF),
+  'churn-visit':  genCohort(ALL_WEEKS,[35,28,23,19,15,12], OFF)
+};
+
+var NDAY={
+  order:genNday(ALL_WEEKS,{1:64,2:60,3:57,4:55,5:53,6:50,7:47,10:42,14:37,21:32,30:27},OFF),
+  visit:genNday(ALL_WEEKS,{1:77,2:73,3:70,4:68,5:66,6:64,7:61,10:56,14:51,21:45,30:40},OFF)
+};
+
+var COHORT_SEG_DAY={
+  act:  genDayCohort(ALL_WEEKS,[59,56,53,51,49,47,46,39],OFF),
+  'new':genDayCohort(ALL_WEEKS,[33,30,27,25,23,22,21,16],OFF),
+  churn:genDayCohort(ALL_WEEKS,[22,19,17,15,14,13,13,9], OFF)
+};
+
+/* ============================================================
+   PERIOD CONFIG
+   ============================================================ */
+var PERIOD={
+  6:{
+    badge:'2025년 1–6월',
+    sliceCount:10,
+    mosuVal:'112,060명',mosuSub:'이전 6개월 98,240명 / <span class="up">▲ +14.1%</span>',
+    cycleVal:'19.1일',cycleSub:'이전 6개월 대비 <span class="up">▲ 0.8일 단축</span>',
+    retVal:'38.4%',retSub:'이전 6개월 대비 <span class="up">▲ 2.1%p 상승</span>',
+    popMonths:['1월','2월','3월','4월','5월','6월'],
+    pop:{active:[80100,82400,84000,85500,86900,89240],churn:[44500,43800,43100,42500,41700,41520],new:[22300,23000,23800,24100,24400,24810]}
+  },
+  12:{
+    badge:'2024년 7월–2025년 6월',
+    sliceCount:16,
+    mosuVal:'112,060명',mosuSub:'이전 12개월 81,400명 / <span class="up">▲ +37.7%</span>',
+    cycleVal:'20.5일',cycleSub:'이전 12개월 대비 <span class="up">▲ 1.4일 단축</span>',
+    retVal:'35.8%',retSub:'이전 12개월 대비 <span class="up">▲ 3.4%p 상승</span>',
+    popMonths:['7월','8월','9월','10월','11월','12월','1월','2월','3월','4월','5월','6월'],
+    pop:{active:[60000,63000,66000,69000,72000,76000,80000,84000,86000,87000,88000,89240],churn:[54000,52000,50000,48000,46000,44000,43000,42500,42100,41800,41600,41520],new:[12000,14000,16000,18000,20000,22000,23000,24000,24400,24600,24700,24810]}
+  }
+};
+
 var COHORT_NOTICES={new:'첫 주문 전환은 제외 · 재구매부터 측정',churn:'윈백 캠페인 전환 유저 기준 · 재이탈 여부 추적'};
-var COHORT_PALETTES={act:'green',new:'blue',churn:'coral'};
+var COHORT_PALETTE_HUES={act:160,new:220,churn:25};
+
+/* ============================================================
+   HELPERS: slice data for current period
+   ============================================================ */
+function getSlice(){return PERIOD[currentPeriod].sliceCount;}
+function getCohorts(key){return COHORT[key].slice(-getSlice());}
+function getNday(mode){return NDAY[mode].slice(-getSlice());}
+function getDayCohort(seg){return COHORT_SEG_DAY[seg].slice(-getSlice());}
+
+/* ============================================================
+   PALETTE GENERATOR (HSL gradient for N lines)
+   ============================================================ */
+function genPalette(hue,n){
+  var c=[];
+  for(var i=0;i<n;i++){
+    var l=Math.round(35+45*i/(Math.max(n-1,1)));
+    c.push('hsl('+hue+',70%,'+l+'%)');
+  }
+  return c;
+}
+
+/* ============================================================
+   UI HELPERS
+   ============================================================ */
 function toggleHelp(e){e.stopPropagation();var tip=e.currentTarget.querySelector('.help-tooltip');tip.classList.toggle('show');document.addEventListener('click',function h(){tip.classList.remove('show');document.removeEventListener('click',h);});}
+
 Chart.defaults.color='#6b6b80';
 Chart.defaults.borderColor='rgba(255,255,255,0.05)';
 var tooltipStyle={backgroundColor:'rgba(20,20,30,0.95)',titleColor:'#fff',bodyColor:'#a0a0b8',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,cornerRadius:10,padding:12,mode:'index'};
+
 function ccol(v){
   if(v>=40)return{bg:'rgba(52,211,153,0.18)',tx:'#34d399'};
   if(v>=25)return{bg:'rgba(251,191,36,0.18)',tx:'#fbbf24'};
@@ -343,37 +440,155 @@ function ndayCol(v){
   if(v>=25)return{bg:'rgba(251,191,36,0.18)',tx:'#fbbf24'};
   return{bg:'rgba(248,113,113,0.18)',tx:'#f87171'};
 }
-function makeTbl(id,rows,weeks){
-  if(built[id])return;built[id]=true;
-  var wrap=document.getElementById(id);
+
+/* ============================================================
+   TABLE RENDERING (weekly cohort labels with date range tooltip)
+   ============================================================ */
+function makeTbl(id,cohorts,cols,colorFn){
+  var wrap=document.getElementById(id);wrap.innerHTML='';
+  colorFn=colorFn||ccol;
   var t=document.createElement('table');t.className='ctbl';
-  var h='<tr><th>코호트</th>';weeks.forEach(function(w){h+='<th>'+w+'</th>';});h+='</tr>';
+  // header
+  var h='<tr><th>코호트</th><th>W0</th>';
+  cols.forEach(function(c){h+='<th>'+c+'</th>';});
+  h+='</tr>';
   t.innerHTML=h;
-  rows.forEach(function(r){
+  cohorts.forEach(function(r){
     var tr=document.createElement('tr');
-    var html='<td>'+r.label+'</td>';
-    r.vals.forEach(function(v,i){
-      if(i===0){html+='<td style="background:rgba(255,255,255,0.04);color:#6b6b80;font-size:11px">기준</td>';return;}
-      if(v===-1||v===null){html+='<td style="color:#3a3a4a">—</td>';return;}
+    var range=wRange(r.w);
+    var html='<td class="wk-label">'+wLabel(r.w)+'<span class="wk-range">'+range+'</span></td>';
+    html+='<td style="background:rgba(255,255,255,0.04);color:#6b6b80;font-size:11px">기준</td>';
+    r.vals.forEach(function(v){
+      if(v===null||v===undefined){html+='<td style="color:#3a3a4a">—</td>';return;}
+      var c=colorFn(v);html+='<td style="background:'+c.bg+';color:'+c.tx+';font-weight:600">'+v+'%</td>';
+    });
+    tr.innerHTML=html;t.appendChild(tr);
+  });
+  wrap.appendChild(t);
+}
+
+// N-Day 전용 테이블
+function makeNdayTbl(id,cohorts){
+  var wrap=document.getElementById(id);wrap.innerHTML='';
+  var t=document.createElement('table');t.className='ctbl';
+  var h='<tr><th>코호트</th>';
+  NDAY_SELECTED.forEach(function(d){h+='<th>D'+d+'</th>';});
+  h+='</tr>';
+  t.innerHTML=h;
+  cohorts.forEach(function(r){
+    var tr=document.createElement('tr');
+    var range=wRange(r.w);
+    var html='<td class="wk-label">'+wLabel(r.w)+'<span class="wk-range">'+range+'</span></td>';
+    NDAY_SELECTED.forEach(function(d){
+      var v=r.data[d];
+      if(v===null||v===undefined){html+='<td style="color:#3a3a4a">—</td>';return;}
+      var c=ndayCol(v);html+='<td style="background:'+c.bg+';color:'+c.tx+';font-weight:600">'+v+'%</td>';
+    });
+    tr.innerHTML=html;t.appendChild(tr);
+  });
+  wrap.appendChild(t);
+}
+
+// Day-level 세그먼트 테이블 (W0 없음)
+function makeDayTbl(id,cohorts,cols){
+  var wrap=document.getElementById(id);wrap.innerHTML='';
+  var t=document.createElement('table');t.className='ctbl';
+  var h='<tr><th>코호트</th>';
+  cols.forEach(function(c){h+='<th>'+c+'</th>';});
+  h+='</tr>';
+  t.innerHTML=h;
+  cohorts.forEach(function(r){
+    var tr=document.createElement('tr');
+    var range=wRange(r.w);
+    var html='<td class="wk-label">'+wLabel(r.w)+'<span class="wk-range">'+range+'</span></td>';
+    r.vals.forEach(function(v){
+      if(v===null||v===undefined){html+='<td style="color:#3a3a4a">—</td>';return;}
       var c=ccol(v);html+='<td style="background:'+c.bg+';color:'+c.tx+';font-weight:600">'+v+'%</td>';
     });
     tr.innerHTML=html;t.appendChild(tr);
   });
   wrap.appendChild(t);
 }
-function buildCohortLine(canvasId,legendId,cohorts,palette){
-  if(charts[canvasId])return;
-  var colors=PALETTES[palette];
+
+/* ============================================================
+   CHART RENDERING
+   ============================================================ */
+function buildCohortLine(canvasId,legendId,cohorts,hue){
+  if(charts[canvasId]){charts[canvasId].destroy();delete charts[canvasId];}
+  var colors=genPalette(hue,cohorts.length);
+  var weekLabels=cohorts.map(function(c){return c.w;});
   charts[canvasId]=new Chart(document.getElementById(canvasId),{
     type:'line',
-    data:{labels:WEEKS,datasets:cohorts.map(function(c,i){return{label:c.label,data:c.vals,borderColor:colors[i%colors.length],backgroundColor:'transparent',borderWidth:2.5,pointRadius:4,pointBackgroundColor:colors[i%colors.length],pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,spanGaps:false};})},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:Object.assign({},tooltipStyle,{callbacks:{label:function(c){return c.dataset.label+(c.parsed.y!==null?': '+c.parsed.y+'%':'');}}})},scales:{x:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'}}},y:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'},callback:function(v){return v+'%'}},min:0,max:80}}}
+    data:{labels:ELAPSED_WEEKS,datasets:cohorts.map(function(c,i){return{
+      label:wLabel(c.w),
+      _weekRange:wRange(c.w),
+      data:c.vals,borderColor:colors[i],backgroundColor:'transparent',
+      borderWidth:2,pointRadius:3,pointBackgroundColor:colors[i],
+      pointBorderColor:'#0a0a0f',pointBorderWidth:1.5,tension:0.4,spanGaps:false
+    };})},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:Object.assign({},tooltipStyle,{callbacks:{
+          title:function(items){return items[0]?items[0].label:'';},
+          label:function(ctx){
+            var ds=ctx.dataset;
+            var range=ds._weekRange?' ('+ds._weekRange+')':'';
+            return ds.label+range+(ctx.parsed.y!==null?': '+ctx.parsed.y+'%':'');
+          }
+        }})
+      },
+      scales:{
+        x:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'}}},
+        y:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'},callback:function(v){return v+'%'}},min:0,max:80}
+      }
+    }
   });
+  // Legend
   var leg=document.getElementById(legendId);
-  if(leg){leg.innerHTML='';cohorts.forEach(function(c,i){var d=document.createElement('div');d.className='li';d.innerHTML='<div class="ldash" style="background:'+colors[i%colors.length]+'"></div>'+c.label;leg.appendChild(d);});}
+  if(leg){
+    leg.innerHTML='';
+    cohorts.forEach(function(c,i){
+      var d=document.createElement('div');d.className='li';
+      d.innerHTML='<div class="ldash" style="background:'+colors[i]+'"></div><span title="'+wRange(c.w)+'">'+wLabel(c.w)+'</span>';
+      leg.appendChild(d);
+    });
+  }
 }
 
-/* === Sub-tab switching === */
+// 세그먼트 트렌드 차트 (x축=코호트 주차, y축=W1 리텐션)
+function buildSegTrendChart(canvasId,cohortWeeks,newData,actData,churnData){
+  if(charts[canvasId]){charts[canvasId].destroy();delete charts[canvasId];}
+  var labels=cohortWeeks.map(function(c){return c.w;});
+  charts[canvasId]=new Chart(document.getElementById(canvasId),{
+    type:'line',
+    data:{labels:labels,datasets:[
+      {label:'0회 출신',data:newData,borderColor:'#60a5fa',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#60a5fa',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},
+      {label:'활성패써',data:actData,borderColor:'#34d399',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#34d399',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},
+      {label:'이탈패써(윈백 후)',data:churnData,borderColor:'#fb923c',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#fb923c',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5,borderDash:[4,3]}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:Object.assign({},tooltipStyle,{callbacks:{
+          title:function(items){
+            if(!items[0])return'';
+            var w=items[0].label;
+            var range=wRange(w);
+            return '2025-'+w+(range?' ('+range+')':'');
+          },
+          label:function(ctx){return ctx.dataset.label+(ctx.parsed.y!==null?': '+ctx.parsed.y+'%':'');}
+        }})
+      },
+      scales:{
+        x:{grid:{color:grid},ticks:{color:tSec,font:{size:10,family:'Inter'},maxRotation:45}},
+        y:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'},callback:function(v){return v+'%'}},min:0,max:80}
+      }
+    }
+  });
+}
+
+/* ============================================================
+   SUB-TAB SWITCHING
+   ============================================================ */
 function swSub(group,mode,el){
   currentSubMode[group]=mode;
   var parent=el.parentElement;
@@ -386,99 +601,66 @@ function swSub(group,mode,el){
       c.classList.toggle('active',id===group+'-'+mode);
     }
   });
-  // Lazy build visit data
   setTimeout(function(){drawSubContent(group,mode);},80);
 }
+
 function drawSubContent(group,mode){
-  if(mode==='order')return; // order data already built
-  var p=PERIOD[currentPeriod];
   if(group==='matrix'){
-    var key='all-visit';
-    makeTbl('tbl-all-visit',[{label:'1월',vals:[null,68,60,54,49,43,38]},{label:'2월',vals:[null,70,62,56,51,45,40]},{label:'3월',vals:[null,72,64,58,53,47,-1]},{label:'4월',vals:[null,69,61,55,50,-1,-1]},{label:'5월',vals:[null,71,63,-1,-1,-1,-1]},{label:'6월',vals:[null,70,-1,-1,-1,-1,-1]}],['W0','W1','W2','W3','W4','W5','W6']);
-    buildCohortLine('c-cohort-all-visit','leg-cohort-all-visit',COHORT_DATA[key],'blue');
+    var key='all-'+mode;
+    makeTbl('tbl-all'+(mode==='order'?'':'-visit'),getCohorts(key),ELAPSED_WEEKS);
+    buildCohortLine(
+      mode==='order'?'c-cohort-all':'c-cohort-all-visit',
+      mode==='order'?'leg-cohort-all':'leg-cohort-all-visit',
+      getCohorts(key),220
+    );
   }
   if(group==='nday'){
-    renderNdayTbl();
+    var ndData=getNday(mode);
+    makeNdayTbl(mode==='order'?'tbl-nday':'tbl-nday-visit',ndData);
   }
   if(group==='seg-trend'){
-    if(!charts['c-seg-visit']){
-      var wkLabelsV=p.segVisit.new.map(function(_,i){return(i+1)+'주차';});
-      charts['c-seg-visit']=new Chart(document.getElementById('c-seg-visit'),{type:'line',data:{labels:wkLabelsV,datasets:[{label:'0회 출신',data:p.segVisit.new,borderColor:'#60a5fa',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#60a5fa',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},{label:'활성패써',data:p.segVisit.active,borderColor:'#34d399',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#34d399',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},{label:'이탈패써(윈백 후)',data:p.segVisit.churn,borderColor:'#fb923c',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#fb923c',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5,borderDash:[4,3]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:Object.assign({},tooltipStyle,{callbacks:{label:function(c){return c.dataset.label+(c.parsed.y!==null?': '+c.parsed.y+'%':'');}}})},scales:{x:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'}}},y:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'},callback:function(v){return v+'%'}},min:0,max:80}}}});
-    }
+    var suffix=mode==='order'?'-order':'-visit';
+    var newC=getCohorts('new'+suffix);
+    var actC=getCohorts('act'+suffix);
+    var churnC=getCohorts('churn'+suffix);
+    buildSegTrendChart(
+      mode==='order'?'c-seg':'c-seg-visit',
+      newC,
+      newC.map(function(c){return c.vals[0];}),
+      actC.map(function(c){return c.vals[0];}),
+      churnC.map(function(c){return c.vals[0];})
+    );
   }
 }
 
-function setPeriod(el,months){
-  document.querySelectorAll('.ftab').forEach(function(t){t.classList.remove('active');});
-  el.classList.add('active');currentPeriod=months;
-  var p=PERIOD[months];
-  document.getElementById('period-badge').textContent=p.badge;
-  document.getElementById('matrix-sub').textContent='첫 구매월 기준 · 최근 '+months+'개월 코호트';
-  document.getElementById('pop-sub').textContent='월 기준 · 최근 '+months+'개월';
-  document.getElementById('seg-sub').textContent='코호트 기준 · W1(첫 주) 재구매율 · 최근 '+months+'개월';
-  document.getElementById('sc-mosu-sub').innerHTML=p.mosuSub;
-  document.getElementById('sc-cycle-sub').innerHTML=p.cycleSub;
-  document.getElementById('sc-ret-val').textContent=p.retVal;
-  document.getElementById('sc-ret-sub').innerHTML=p.retSub;
-  if(charts['c-population']){charts['c-population'].data.labels=p.months;charts['c-population'].data.datasets[0].data=p.pop.active;charts['c-population'].data.datasets[1].data=p.pop.churn;charts['c-population'].data.datasets[2].data=p.pop.new;charts['c-population'].update();}
-  if(charts['c-seg']){var wk=p.seg.new.map(function(_,i){return(i+1)+'주차';});charts['c-seg'].data.labels=wk;charts['c-seg'].data.datasets[0].data=p.seg.new;charts['c-seg'].data.datasets[1].data=p.seg.active;charts['c-seg'].data.datasets[2].data=p.seg.churn;charts['c-seg'].update();}
-  if(charts['c-seg-visit']){var wkv=p.segVisit.new.map(function(_,i){return(i+1)+'주차';});charts['c-seg-visit'].data.labels=wkv;charts['c-seg-visit'].data.datasets[0].data=p.segVisit.new;charts['c-seg-visit'].data.datasets[1].data=p.segVisit.active;charts['c-seg-visit'].data.datasets[2].data=p.segVisit.churn;charts['c-seg-visit'].update();}
-}
-function sw(el,tab){
-  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
-  el.classList.add('active');
-  ['all','seg'].forEach(function(t){document.getElementById('tab-'+t).style.display=t===tab?'':'none';});
-  setTimeout(function(){draw(tab);},80);
-}
-
+/* ============================================================
+   N-DAY SELECTOR
+   ============================================================ */
 function toggleNday(day,el){
   var idx=NDAY_SELECTED.indexOf(day);
   if(idx>-1){if(NDAY_SELECTED.length<=1)return;NDAY_SELECTED.splice(idx,1);el.classList.remove('active');}
   else{NDAY_SELECTED.push(day);NDAY_SELECTED.sort(function(a,b){return a-b;});el.classList.add('active');}
-  renderNdayTbl();
+  renderNdayBoth();
 }
-function renderNdayTbl(){
+function renderNdayBoth(){
   var mode=currentSubMode['nday']||'order';
-  var tblId=mode==='order'?'tbl-nday':'tbl-nday-visit';
-  var wrap=document.getElementById(tblId);wrap.innerHTML='';
-  var cohorts=NDAY_COHORTS[mode];
-  var t=document.createElement('table');t.className='ctbl';
-  var h='<tr><th>코호트</th>';NDAY_SELECTED.forEach(function(d){h+='<th>D'+d+'</th>';});h+='</tr>';
-  t.innerHTML=h;
-  cohorts.forEach(function(r){
-    var tr=document.createElement('tr');
-    var html='<td>'+r.label+'</td>';
-    NDAY_SELECTED.forEach(function(d){
-      var v=r.data[d];
-      if(v===null||v===undefined){html+='<td style="color:#3a3a4a">—</td>';return;}
-      var c=ndayCol(v);html+='<td style="background:'+c.bg+';color:'+c.tx+';font-weight:600">'+v+'%</td>';
-    });
-    tr.innerHTML=html;t.appendChild(tr);
-  });
-  wrap.appendChild(t);
-  // Also rebuild the other mode table if it was built before
-  var otherMode=mode==='order'?'visit':'order';
-  var otherTblId=otherMode==='order'?'tbl-nday':'tbl-nday-visit';
-  var otherWrap=document.getElementById(otherTblId);
-  if(otherWrap && otherWrap.children.length>0){
-    otherWrap.innerHTML='';
-    var cohorts2=NDAY_COHORTS[otherMode];
-    var t2=document.createElement('table');t2.className='ctbl';
-    var h2='<tr><th>코호트</th>';NDAY_SELECTED.forEach(function(d){h2+='<th>D'+d+'</th>';});h2+='</tr>';
-    t2.innerHTML=h2;
-    cohorts2.forEach(function(r){
-      var tr=document.createElement('tr');
-      var html='<td>'+r.label+'</td>';
-      NDAY_SELECTED.forEach(function(d){
-        var v=r.data[d];
-        if(v===null||v===undefined){html+='<td style="color:#3a3a4a">—</td>';return;}
-        var c=ndayCol(v);html+='<td style="background:'+c.bg+';color:'+c.tx+';font-weight:600">'+v+'%</td>';
-      });
-      tr.innerHTML=html;t2.appendChild(tr);
-    });
-    otherWrap.appendChild(t2);
-  }
+  makeNdayTbl('tbl-nday',getNday('order'));
+  makeNdayTbl('tbl-nday-visit',getNday('visit'));
 }
+function buildNdayOpts(){
+  var opts=document.getElementById('nday-options');
+  if(opts.children.length>0)return;
+  NDAY_ALL_DAYS.forEach(function(d){
+    var btn=document.createElement('button');btn.className='nday-opt';btn.textContent='D'+d;
+    if(NDAY_SELECTED.indexOf(d)>-1)btn.classList.add('active');
+    btn.onclick=function(){toggleNday(d,btn);};
+    opts.appendChild(btn);
+  });
+}
+
+/* ============================================================
+   UNIFIED COHORT VIEW (segment tab)
+   ============================================================ */
 function swCohortFilter(filterType,val,el){
   var parent=el.parentElement;
   parent.querySelectorAll('.stab').forEach(function(t){t.classList.remove('active');});
@@ -492,90 +674,180 @@ function renderCohortUnified(){
   var noticeEl=document.getElementById('cohort-notice');
   if(COHORT_NOTICES[cohortSeg]){noticeEl.style.display='';noticeEl.textContent=COHORT_NOTICES[cohortSeg];}
   else{noticeEl.style.display='none';}
-  // Table
-  var wrap=document.getElementById('tbl-cohort-unified');wrap.innerHTML='';
+
   var isDay=cohortType==='day';
-  var weeks=isDay?COHORT_SEG_DAY_COLS:['W0','W1','W2','W3','W4','W5','W6'];
-  var dataKey=cohortSeg;
-  var rows;
+  var hue=COHORT_PALETTE_HUES[cohortSeg];
+
   if(isDay){
-    rows=COHORT_SEG_DAY[dataKey];
-    var t=document.createElement('table');t.className='ctbl';
-    var h='<tr><th>코호트</th>';COHORT_SEG_DAY_COLS.forEach(function(w){h+='<th>'+w+'</th>';});h+='</tr>';
-    t.innerHTML=h;
-    rows.forEach(function(r){
-      var tr=document.createElement('tr');
-      var html='<td>'+r.label+'</td>';
-      r.vals.forEach(function(v){
-        if(v===null||v===-1){html+='<td style="color:#3a3a4a">—</td>';return;}
-        var c=ccol(v);html+='<td style="background:'+c.bg+';color:'+c.tx+';font-weight:600">'+v+'%</td>';
-      });
-      tr.innerHTML=html;t.appendChild(tr);
+    var dayData=getDayCohort(cohortSeg);
+    makeDayTbl('tbl-cohort-unified',dayData,DAY_COLS);
+    // Chart
+    if(charts['c-cohort-unified']){charts['c-cohort-unified'].destroy();delete charts['c-cohort-unified'];}
+    var colors=genPalette(hue,dayData.length);
+    charts['c-cohort-unified']=new Chart(document.getElementById('c-cohort-unified'),{
+      type:'line',
+      data:{labels:DAY_COLS,datasets:dayData.map(function(c,i){return{
+        label:wLabel(c.w),_weekRange:wRange(c.w),data:c.vals,
+        borderColor:colors[i],backgroundColor:'transparent',borderWidth:2,
+        pointRadius:3,pointBackgroundColor:colors[i],pointBorderColor:'#0a0a0f',
+        pointBorderWidth:1.5,tension:0.4,spanGaps:false
+      };})},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:Object.assign({},tooltipStyle,{callbacks:{
+          title:function(items){return items[0]?items[0].label:'';},
+          label:function(ctx){var ds=ctx.dataset;var rng=ds._weekRange?' ('+ds._weekRange+')':'';return ds.label+rng+(ctx.parsed.y!==null?': '+ctx.parsed.y+'%':'');}
+        }})},
+        scales:{
+          x:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'}}},
+          y:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'},callback:function(v){return v+'%'}},min:0,max:80}
+        }
+      }
     });
-    wrap.appendChild(t);
+    updateUnifiedLegend(dayData,colors);
   } else {
-    rows=COHORT_DATA[dataKey];
-    var tblRows=rows.map(function(r){return{label:r.label,vals:[null].concat(r.vals)};});
-    var t=document.createElement('table');t.className='ctbl';
-    var h='<tr><th>코호트</th>';weeks.forEach(function(w){h+='<th>'+w+'</th>';});h+='</tr>';
-    t.innerHTML=h;
-    tblRows.forEach(function(r){
-      var tr=document.createElement('tr');
-      var html='<td>'+r.label+'</td>';
-      r.vals.forEach(function(v,i){
-        if(i===0){html+='<td style="background:rgba(255,255,255,0.04);color:#6b6b80;font-size:11px">기준</td>';return;}
-        if(v===-1||v===null){html+='<td style="color:#3a3a4a">—</td>';return;}
-        var c=ccol(v);html+='<td style="background:'+c.bg+';color:'+c.tx+';font-weight:600">'+v+'%</td>';
-      });
-      tr.innerHTML=html;t.appendChild(tr);
+    var weekData=getCohorts(cohortSeg+'-order');
+    makeTbl('tbl-cohort-unified',weekData,ELAPSED_WEEKS);
+    // Chart
+    if(charts['c-cohort-unified']){charts['c-cohort-unified'].destroy();delete charts['c-cohort-unified'];}
+    var colors2=genPalette(hue,weekData.length);
+    charts['c-cohort-unified']=new Chart(document.getElementById('c-cohort-unified'),{
+      type:'line',
+      data:{labels:ELAPSED_WEEKS,datasets:weekData.map(function(c,i){return{
+        label:wLabel(c.w),_weekRange:wRange(c.w),data:c.vals,
+        borderColor:colors2[i],backgroundColor:'transparent',borderWidth:2,
+        pointRadius:3,pointBackgroundColor:colors2[i],pointBorderColor:'#0a0a0f',
+        pointBorderWidth:1.5,tension:0.4,spanGaps:false
+      };})},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:Object.assign({},tooltipStyle,{callbacks:{
+          title:function(items){return items[0]?items[0].label:'';},
+          label:function(ctx){var ds=ctx.dataset;var rng=ds._weekRange?' ('+ds._weekRange+')':'';return ds.label+rng+(ctx.parsed.y!==null?': '+ctx.parsed.y+'%':'');}
+        }})},
+        scales:{
+          x:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'}}},
+          y:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'},callback:function(v){return v+'%'}},min:0,max:80}
+        }
+      }
     });
-    wrap.appendChild(t);
+    updateUnifiedLegend(weekData,colors2);
   }
-  // Chart
-  var canvasId='c-cohort-unified';
-  if(charts[canvasId]){charts[canvasId].destroy();delete charts[canvasId];}
-  var chartData=isDay?COHORT_SEG_DAY[dataKey]:COHORT_DATA[dataKey];
-  var labels=isDay?COHORT_SEG_DAY_COLS:WEEKS;
-  var palette=COHORT_PALETTES[cohortSeg];
-  var colors=PALETTES[palette];
-  charts[canvasId]=new Chart(document.getElementById(canvasId),{
-    type:'line',
-    data:{labels:labels,datasets:chartData.map(function(c,i){return{label:c.label,data:c.vals,borderColor:colors[i%colors.length],backgroundColor:'transparent',borderWidth:2.5,pointRadius:4,pointBackgroundColor:colors[i%colors.length],pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,spanGaps:false};})},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:Object.assign({},tooltipStyle,{callbacks:{label:function(c){return c.dataset.label+(c.parsed.y!==null?': '+c.parsed.y+'%':'');}}})},scales:{x:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'}}},y:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'},callback:function(v){return v+'%'}},min:0,max:80}}}
+}
+function updateUnifiedLegend(data,colors){
+  var leg=document.getElementById('leg-cohort-unified');leg.innerHTML='';
+  data.forEach(function(c,i){
+    var d=document.createElement('div');d.className='li';
+    d.innerHTML='<div class="ldash" style="background:'+colors[i]+'"></div><span title="'+wRange(c.w)+'">'+wLabel(c.w)+'</span>';
+    leg.appendChild(d);
   });
-  var leg=document.getElementById('leg-cohort-unified');
-  leg.innerHTML='';chartData.forEach(function(c,i){var d=document.createElement('div');d.className='li';d.innerHTML='<div class="ldash" style="background:'+colors[i%colors.length]+'"></div>'+c.label;leg.appendChild(d);});
 }
-function buildNday(){
-  var opts=document.getElementById('nday-options');
-  if(opts.children.length===0){
-    NDAY_ALL_DAYS.forEach(function(d){
-      var btn=document.createElement('button');btn.className='nday-opt';btn.textContent='D'+d;
-      if(NDAY_SELECTED.indexOf(d)>-1)btn.classList.add('active');
-      btn.onclick=function(){toggleNday(d,btn);};
-      opts.appendChild(btn);
-    });
-  }
-  renderNdayTbl();
+
+/* ============================================================
+   PERIOD SWITCHING
+   ============================================================ */
+function setPeriod(el,months){
+  document.querySelectorAll('.ftab').forEach(function(t){t.classList.remove('active');});
+  el.classList.add('active');
+  currentPeriod=months;
+  var p=PERIOD[months];
+  var sc=p.sliceCount;
+
+  // Update badges & summary cards
+  document.getElementById('period-badge').textContent=p.badge;
+  document.getElementById('matrix-sub').textContent='첫 구매주 기준 · 최근 '+sc+'주 코호트';
+  document.getElementById('pop-sub').textContent='월 기준 · 최근 '+months+'개월';
+  document.getElementById('sc-mosu-val').textContent=p.mosuVal;
+  document.getElementById('sc-mosu-sub').innerHTML=p.mosuSub;
+  document.getElementById('sc-cycle-val').textContent=p.cycleVal;
+  document.getElementById('sc-cycle-sub').innerHTML=p.cycleSub;
+  document.getElementById('sc-ret-val').textContent=p.retVal;
+  document.getElementById('sc-ret-sub').innerHTML=p.retSub;
+
+  // Destroy all charts and rebuild
+  Object.keys(charts).forEach(function(k){charts[k].destroy();});
+  charts={};
+
+  // Redraw active tab
+  var activeTab=document.querySelector('.tab.active');
+  var tab=activeTab&&activeTab.textContent.indexOf('세그먼트')>-1?'seg':'all';
+  draw(tab);
 }
+
+/* ============================================================
+   TAB SWITCHING
+   ============================================================ */
+function sw(el,tab){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  el.classList.add('active');
+  ['all','seg'].forEach(function(t){document.getElementById('tab-'+t).style.display=t===tab?'':'none';});
+  setTimeout(function(){draw(tab);},80);
+}
+
+/* ============================================================
+   MAIN DRAW
+   ============================================================ */
 function draw(tab){
   var p=PERIOD[currentPeriod];
+
   if(tab==='all'){
-    makeTbl('tbl-all',[{label:'1월',vals:[null,51,43,37,33,28,25]},{label:'2월',vals:[null,53,45,39,35,30,27]},{label:'3월',vals:[null,55,47,41,37,32,-1]},{label:'4월',vals:[null,52,44,38,34,-1,-1]},{label:'5월',vals:[null,54,46,-1,-1,-1,-1]},{label:'6월',vals:[null,53,-1,-1,-1,-1,-1]}],['W0','W1','W2','W3','W4','W5','W6']);
-    buildCohortLine('c-cohort-all','leg-cohort-all',COHORT_DATA.all,'blue');
-    buildNday();
+    // 전체 코호트 매트릭스 (order)
+    var mode=currentSubMode['matrix']||'order';
+    makeTbl('tbl-all',getCohorts('all-order'),ELAPSED_WEEKS);
+    buildCohortLine('c-cohort-all','leg-cohort-all',getCohorts('all-order'),220);
+
+    // Visit도 미리 준비
+    makeTbl('tbl-all-visit',getCohorts('all-visit'),ELAPSED_WEEKS);
+    buildCohortLine('c-cohort-all-visit','leg-cohort-all-visit',getCohorts('all-visit'),220);
+
+    // N-Day
+    buildNdayOpts();
+    makeNdayTbl('tbl-nday',getNday('order'));
+    makeNdayTbl('tbl-nday-visit',getNday('visit'));
   }
+
   if(tab==='seg'){
+    // Population chart (monthly, unchanged)
     if(!charts['c-population']){
-      charts['c-population']=new Chart(document.getElementById('c-population'),{type:'line',data:{labels:p.months,datasets:[{label:'활성패써',data:p.pop.active,borderColor:'#34d399',backgroundColor:'rgba(52,211,153,0.08)',fill:true,pointRadius:4,pointBackgroundColor:'#34d399',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},{label:'이탈패써',data:p.pop.churn,borderColor:'#fb923c',backgroundColor:'rgba(251,146,60,0.08)',fill:true,pointRadius:4,pointBackgroundColor:'#fb923c',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},{label:'0회 출신',data:p.pop.new,borderColor:'#60a5fa',backgroundColor:'rgba(96,165,250,0.08)',fill:true,pointRadius:4,pointBackgroundColor:'#60a5fa',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:Object.assign({},tooltipStyle,{callbacks:{label:function(c){return c.dataset.label+': '+c.parsed.y.toLocaleString()+'명';}}})},scales:{x:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'}}},y:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'},callback:function(v){return Math.round(v/10000)+'만';}},min:0}}}});
+      charts['c-population']=new Chart(document.getElementById('c-population'),{
+        type:'line',
+        data:{labels:p.popMonths,datasets:[
+          {label:'활성패써',data:p.pop.active,borderColor:'#34d399',backgroundColor:'rgba(52,211,153,0.08)',fill:true,pointRadius:4,pointBackgroundColor:'#34d399',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},
+          {label:'이탈패써',data:p.pop.churn,borderColor:'#fb923c',backgroundColor:'rgba(251,146,60,0.08)',fill:true,pointRadius:4,pointBackgroundColor:'#fb923c',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},
+          {label:'0회 출신',data:p.pop.new,borderColor:'#60a5fa',backgroundColor:'rgba(96,165,250,0.08)',fill:true,pointRadius:4,pointBackgroundColor:'#60a5fa',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5}
+        ]},
+        options:{responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:false},tooltip:Object.assign({},tooltipStyle,{callbacks:{label:function(c){return c.dataset.label+': '+c.parsed.y.toLocaleString()+'명';}}})},
+          scales:{
+            x:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'}}},
+            y:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'},callback:function(v){return Math.round(v/10000)+'만';}},min:0}
+          }
+        }
+      });
     }
+
+    // Segment W1 trend (order)
+    var newC=getCohorts('new-order'),actC=getCohorts('act-order'),churnC=getCohorts('churn-order');
+    buildSegTrendChart('c-seg',newC,
+      newC.map(function(c){return c.vals[0];}),
+      actC.map(function(c){return c.vals[0];}),
+      churnC.map(function(c){return c.vals[0];})
+    );
+
+    // Segment W1 trend (visit)
+    var newV=getCohorts('new-visit'),actV=getCohorts('act-visit'),churnV=getCohorts('churn-visit');
+    buildSegTrendChart('c-seg-visit',newV,
+      newV.map(function(c){return c.vals[0];}),
+      actV.map(function(c){return c.vals[0];}),
+      churnV.map(function(c){return c.vals[0];})
+    );
+
+    // Unified cohort
     renderCohortUnified();
-    if(!charts['c-seg']){
-      var wkLabels=p.seg.new.map(function(_,i){return(i+1)+'주차';});
-      charts['c-seg']=new Chart(document.getElementById('c-seg'),{type:'line',data:{labels:wkLabels,datasets:[{label:'0회 출신',data:p.seg.new,borderColor:'#60a5fa',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#60a5fa',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},{label:'활성패써',data:p.seg.active,borderColor:'#34d399',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#34d399',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5},{label:'이탈패써(윈백 후)',data:p.seg.churn,borderColor:'#fb923c',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'#fb923c',pointBorderColor:'#0a0a0f',pointBorderWidth:2,tension:0.4,borderWidth:2.5,borderDash:[4,3]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:Object.assign({},tooltipStyle,{callbacks:{label:function(c){return c.dataset.label+(c.parsed.y!==null?': '+c.parsed.y+'%':'');}}})},scales:{x:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'}}},y:{grid:{color:grid},ticks:{color:tSec,font:{size:11,family:'Inter'},callback:function(v){return v+'%'}},min:0,max:80}}}});
-    }
   }
 }
+
+/* ============================================================
+   INITIAL DRAW
+   ============================================================ */
 draw('all');
 </script>
 </body>
