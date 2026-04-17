@@ -269,32 +269,52 @@ var tSec='#6b6b80',grid='rgba(255,255,255,0.05)';
 var ELAPSED_WEEKS=['W1','W2','W3','W4','W5','W6'];
 var NDAY_ALL_DAYS=[0,1,2,3,4,5,6,7,10,14,21,30];
 var NDAY_SELECTED=[0,1,2,3,4,5,6,7,10,14,21,30];
-var CURRENT_WEEK=26; // 현재 2025-W26 기준
 
 /* ============================================================
    WEEK DEFINITIONS (2025 ISO weeks, Monday start)
    ============================================================ */
+// 2024-W27 ~ 2025-W25 (52주 풀)
+// key format: "24W27" = 2024-W27, "25W01" = 2025-W01
 var WEEK_RANGE={
-  'W01':'12/30~1/5','W02':'1/6~1/12','W03':'1/13~1/19','W04':'1/20~1/26',
-  'W05':'1/27~2/2','W06':'2/3~2/9','W07':'2/10~2/16','W08':'2/17~2/23',
-  'W09':'2/24~3/2','W10':'3/3~3/9','W11':'3/10~3/16','W12':'3/17~3/23',
-  'W13':'3/24~3/30','W14':'3/31~4/6','W15':'4/7~4/13','W16':'4/14~4/20',
-  'W17':'4/21~4/27','W18':'4/28~5/4','W19':'5/5~5/11','W20':'5/12~5/18',
-  'W21':'5/19~5/25','W22':'5/26~6/1','W23':'6/2~6/8','W24':'6/9~6/15',
-  'W25':'6/16~6/22'
+  '24W27':'7/1~7/7','24W28':'7/8~7/14','24W29':'7/15~7/21','24W30':'7/22~7/28',
+  '24W31':'7/29~8/4','24W32':'8/5~8/11','24W33':'8/12~8/18','24W34':'8/19~8/25',
+  '24W35':'8/26~9/1','24W36':'9/2~9/8','24W37':'9/9~9/15','24W38':'9/16~9/22',
+  '24W39':'9/23~9/29','24W40':'9/30~10/6','24W41':'10/7~10/13','24W42':'10/14~10/20',
+  '24W43':'10/21~10/27','24W44':'10/28~11/3','24W45':'11/4~11/10','24W46':'11/11~11/17',
+  '24W47':'11/18~11/24','24W48':'11/25~12/1','24W49':'12/2~12/8','24W50':'12/9~12/15',
+  '24W51':'12/16~12/22','24W52':'12/23~12/29',
+  '25W01':'12/30~1/5','25W02':'1/6~1/12','25W03':'1/13~1/19','25W04':'1/20~1/26',
+  '25W05':'1/27~2/2','25W06':'2/3~2/9','25W07':'2/10~2/16','25W08':'2/17~2/23',
+  '25W09':'2/24~3/2','25W10':'3/3~3/9','25W11':'3/10~3/16','25W12':'3/17~3/23',
+  '25W13':'3/24~3/30','25W14':'3/31~4/6','25W15':'4/7~4/13','25W16':'4/14~4/20',
+  '25W17':'4/21~4/27','25W18':'4/28~5/4','25W19':'5/5~5/11','25W20':'5/12~5/18',
+  '25W21':'5/19~5/25','25W22':'5/26~6/1','25W23':'6/2~6/8','25W24':'6/9~6/15',
+  '25W25':'6/16~6/22'
 };
-// 전체 코호트 주차 풀 (25주: W01~W25)
-var ALL_WEEKS=['W01','W02','W03','W04','W05','W06','W07','W08','W09','W10','W11','W12','W13','W14','W15','W16','W17','W18','W19','W20','W21','W22','W23','W24','W25'];
+// 전체 코호트 주차 풀 (52주: 2024-W27 ~ 2025-W25)
+var ALL_WEEKS=[
+  '24W27','24W28','24W29','24W30','24W31','24W32','24W33','24W34','24W35','24W36','24W37','24W38','24W39',
+  '24W40','24W41','24W42','24W43','24W44','24W45','24W46','24W47','24W48','24W49','24W50','24W51','24W52',
+  '25W01','25W02','25W03','25W04','25W05','25W06','25W07','25W08','25W09','25W10','25W11','25W12','25W13',
+  '25W14','25W15','25W16','25W17','25W18','25W19','25W20','25W21','25W22','25W23','25W24','25W25'
+];
 
-function wn(w){return parseInt(w.substring(1));}
+// "24W27" → 연도=2024, 주차=27 / "25W01" → 연도=2025, 주차=1
+function wYear(w){return 2000+parseInt(w.substring(0,2));}
+function wNum(w){return parseInt(w.substring(3));}
+// 순서 비교용 글로벌 인덱스 (2024-W27=0, ... 2025-W25=51)
+function wIdx(w){return ALL_WEEKS.indexOf(w);}
+// CURRENT_WEEK을 글로벌 인덱스로
+var CURRENT_IDX=ALL_WEEKS.length; // 현재 주 = 풀 끝 다음 (2025-W26)
 function wRange(w){return WEEK_RANGE[w]||'';}
-// 코호트 레이블: "2025-04/14~04/20" 형태
+// 코호트 레이블: "2024-07/01~07/07" 또는 "2025-04/14~04/20"
 function wLabel(w){
   var r=WEEK_RANGE[w];
-  if(!r)return '2025-'+w;
+  var yr=wYear(w);
+  if(!r)return yr+'-W'+wNum(w);
   var parts=r.split('~');
   function pad(s){var p=s.split('/');return(p[0].length<2?'0':'')+p[0]+'/'+(p[1].length<2?'0':'')+p[1];}
-  return '2025-'+pad(parts[0])+'~'+pad(parts[1]);
+  return yr+'-'+pad(parts[0])+'~'+pad(parts[1]);
 }
 
 /* ============================================================
@@ -306,7 +326,7 @@ var OFF=[-1,2,-2,1,3,-1,0,2,-2,1,2,-1,1,0,-2,0];
 // 주간 코호트 리텐션 데이터 생성 (경과 주 W1~W6)
 function genCohort(weeks,base,offsets){
   return weeks.map(function(w,i){
-    var avail=Math.min(base.length,CURRENT_WEEK-wn(w));
+    var avail=Math.min(base.length,CURRENT_IDX-wIdx(w));
     var o=offsets[i%offsets.length];
     return{w:w,vals:base.map(function(v,j){return j<avail?Math.max(0,v+o):null;})};
   });
@@ -315,7 +335,7 @@ function genCohort(weeks,base,offsets){
 // N-Day 리텐션 데이터 생성
 function genNday(weeks,baseObj,offsets){
   return weeks.map(function(w,i){
-    var days=(CURRENT_WEEK-wn(w))*7;
+    var days=(CURRENT_IDX-wIdx(w))*7;
     var o=offsets[i%offsets.length];
     var data={};
     NDAY_ALL_DAYS.forEach(function(d){
@@ -331,7 +351,7 @@ var DAY_COLS=['D1','D2','D3','D4','D5','D6','D7','D14'];
 var DAY_NUMS=[1,2,3,4,5,6,7,14];
 function genDayCohort(weeks,base,offsets){
   return weeks.map(function(w,i){
-    var days=(CURRENT_WEEK-wn(w))*7;
+    var days=(CURRENT_IDX-wIdx(w))*7;
     var o=offsets[i%offsets.length];
     return{w:w,vals:DAY_NUMS.map(function(d,j){return d<=days?Math.max(0,base[j]+o):null;})};
   });
@@ -367,7 +387,7 @@ var SIZE_OFF=[0,-8,12,-5,4,8,-3,0,10,-6,5,-10,7,0,-4,3];
 
 function genSnapshotCohort(weeks,base,baseSize,offsets){
   return weeks.map(function(w,i){
-    var avail=Math.min(base.length,CURRENT_WEEK-wn(w));
+    var avail=Math.min(base.length,CURRENT_IDX-wIdx(w));
     var o=offsets[i%offsets.length];
     var sf=1+SIZE_OFF[i%SIZE_OFF.length]/100;
     return{w:w,size:Math.round(baseSize*sf),
@@ -376,7 +396,7 @@ function genSnapshotCohort(weeks,base,baseSize,offsets){
 }
 function genSnapshotDay(weeks,base,baseSize,offsets){
   return weeks.map(function(w,i){
-    var days=(CURRENT_WEEK-wn(w))*7;
+    var days=(CURRENT_IDX-wIdx(w))*7;
     var o=offsets[i%offsets.length];
     var sf=1+SIZE_OFF[i%SIZE_OFF.length]/100;
     return{w:w,size:Math.round(baseSize*sf),
@@ -409,7 +429,7 @@ var SEG_SNAPSHOT_DAY={
 var PERIOD={
   3:{
     badge:'2025년 4–6월',
-    sliceCount:13,
+    sliceCount:13, // 3개월 ≈ 13주
     mosuVal:'58,120명',mosuSub:'이전 3개월 54,800명 / <span class="up">▲ +6.1%</span>',
     cycleVal:'18.4일',cycleSub:'이전 3개월 대비 <span class="up">▲ 0.5일 단축</span>',
     popMonths:['4월','5월','6월'],
@@ -417,7 +437,7 @@ var PERIOD={
   },
   6:{
     badge:'2025년 1–6월',
-    sliceCount:16,
+    sliceCount:26, // 6개월 ≈ 26주
     mosuVal:'112,060명',mosuSub:'이전 6개월 98,240명 / <span class="up">▲ +14.1%</span>',
     cycleVal:'19.1일',cycleSub:'이전 6개월 대비 <span class="up">▲ 0.8일 단축</span>',
     popMonths:['1월','2월','3월','4월','5월','6월'],
@@ -425,7 +445,7 @@ var PERIOD={
   },
   12:{
     badge:'2024년 7월–2025년 6월',
-    sliceCount:25,
+    sliceCount:52, // 12개월 ≈ 52주
     mosuVal:'112,060명',mosuSub:'이전 12개월 81,400명 / <span class="up">▲ +37.7%</span>',
     cycleVal:'20.5일',cycleSub:'이전 12개월 대비 <span class="up">▲ 1.4일 단축</span>',
     popMonths:['7월','8월','9월','10월','11월','12월','1월','2월','3월','4월','5월','6월'],
@@ -497,7 +517,7 @@ function makeTbl(id,cohorts,cols,colorFn){
   t.innerHTML=h;
   cohorts.forEach(function(r){
     var tr=document.createElement('tr');
-    var html='<td class="wk-label">'+wLabel(r.w)+'<span class="wk-range">2025-'+r.w+'</span></td>';
+    var html='<td class="wk-label">'+wLabel(r.w)+'<span class="wk-range">'+wYear(r.w)+'-W'+wNum(r.w)+'</span></td>';
     html+='<td style="background:rgba(255,255,255,0.04);color:#6b6b80;font-size:11px">100%</td>';
     r.vals.forEach(function(v){
       if(v===null||v===undefined){html+='<td style="color:#3a3a4a">—</td>';return;}
@@ -518,7 +538,7 @@ function makeNdayTbl(id,cohorts){
   t.innerHTML=h;
   cohorts.forEach(function(r){
     var tr=document.createElement('tr');
-    var html='<td class="wk-label">'+wLabel(r.w)+'<span class="wk-range">2025-'+r.w+'</span></td>';
+    var html='<td class="wk-label">'+wLabel(r.w)+'<span class="wk-range">'+wYear(r.w)+'-W'+wNum(r.w)+'</span></td>';
     NDAY_SELECTED.forEach(function(d){
       var v=r.data[d];
       if(d===0){html+='<td style="background:rgba(255,255,255,0.04);color:#6b6b80;font-size:11px">100%</td>';return;}
@@ -540,7 +560,7 @@ function makeDayTbl(id,cohorts,cols){
   t.innerHTML=h;
   cohorts.forEach(function(r){
     var tr=document.createElement('tr');
-    var html='<td class="wk-label">'+wLabel(r.w)+'<span class="wk-range">2025-'+r.w+'</span></td>';
+    var html='<td class="wk-label">'+wLabel(r.w)+'<span class="wk-range">'+wYear(r.w)+'-W'+wNum(r.w)+'</span></td>';
     r.vals.forEach(function(v){
       if(v===null||v===undefined){html+='<td style="color:#3a3a4a">—</td>';return;}
       var c=ccol(v);html+='<td style="background:'+c.bg+';color:'+c.tx+';font-weight:600">'+v+'%</td>';
@@ -560,7 +580,7 @@ function makeSnapshotTbl(id,cohorts,cols){
   t.innerHTML=h;
   cohorts.forEach(function(r){
     var tr=document.createElement('tr');
-    var html='<td class="wk-label">'+wLabel(r.w)+'<span class="wk-range">2025-'+r.w+'</span></td>';
+    var html='<td class="wk-label">'+wLabel(r.w)+'<span class="wk-range">'+wYear(r.w)+'-W'+wNum(r.w)+'</span></td>';
     html+='<td style="color:#8b8b9e;font-size:11px;font-weight:500">'+r.size.toLocaleString()+'명</td>';
     r.vals.forEach(function(v){
       if(v===null||v===undefined){html+='<td style="color:#3a3a4a">—</td>';return;}
