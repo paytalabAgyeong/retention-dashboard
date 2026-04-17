@@ -171,9 +171,9 @@ body{background:#0a0a0f;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Se
     </div>
   </div>
 
-  <!-- 전체 코호트 리텐션 매트릭스 -->
+  <!-- 전체 코호트 리텐션 히트맵 -->
   <div class="card">
-    <div class="ct">전체 코호트 리텐션 매트릭스</div>
+    <div class="ct">전체 코호트 리텐션 히트맵</div>
     <div class="cs" id="matrix-sub">첫 구매주 기준 · 최근 13주 코호트</div>
     <div class="sub-tabs" id="stabs-matrix">
       <button class="stab active" onclick="swSub('matrix','order',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>주문 리텐션</button>
@@ -759,7 +759,7 @@ function draw(tab){
   var p=PERIOD[currentPeriod];
 
   if(tab==='all'){
-    // 전체 코호트 매트릭스 (order)
+    // 전체 코호트 히트맵 (order)
     var mode=currentSubMode['matrix']||'order';
     makeTbl('tbl-all',getCohorts('all-order'),ELAPSED_WEEKS);
     // Visit도 미리 준비
