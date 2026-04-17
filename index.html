@@ -68,9 +68,9 @@ body{background:#0a0a0f;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Se
 /* Cohort table */
 .cohort-wrap{overflow-x:auto}
 .ctbl{border-collapse:separate;border-spacing:3px;font-size:12px;width:100%}
-.ctbl th{text-align:center;padding:6px 10px;font-weight:500;color:#6b6b80;border-bottom:1px solid rgba(255,255,255,0.06);white-space:nowrap;font-size:11px}
+.ctbl th{text-align:left;padding:6px 10px;font-weight:500;color:#6b6b80;border-bottom:1px solid rgba(255,255,255,0.06);white-space:nowrap;font-size:11px}
 .ctbl th:first-child{text-align:left}
-.ctbl td{text-align:center;padding:6px 8px;border-radius:6px;white-space:nowrap;transition:transform 0.15s ease}
+.ctbl td{text-align:left;padding:6px 8px;border-radius:6px;white-space:nowrap;transition:transform 0.15s ease}
 .ctbl td:hover{transform:scale(1.05)}
 .ctbl tr td:first-child{text-align:left;color:#6b6b80;font-size:11px;padding-right:12px;font-weight:500}
 .ctbl tr td:first-child:hover{transform:none}
@@ -267,8 +267,8 @@ var charts={},currentPeriod=3,currentSubMode={};
 var cohortSeg='act',cohortType='week',cohortMetric='order';
 var tSec='#6b6b80',grid='rgba(255,255,255,0.05)';
 var ELAPSED_WEEKS=['W1','W2','W3','W4','W5','W6'];
-var NDAY_ALL_DAYS=[1,2,3,4,5,6,7,10,14,21,30];
-var NDAY_SELECTED=[1,2,3,4,5,6,7,10,14,21,30];
+var NDAY_ALL_DAYS=[0,1,2,3,4,5,6,7,10,14,21,30];
+var NDAY_SELECTED=[0,1,2,3,4,5,6,7,10,14,21,30];
 var CURRENT_WEEK=26; // 현재 2025-W26 기준
 
 /* ============================================================
@@ -318,7 +318,10 @@ function genNday(weeks,baseObj,offsets){
     var days=(CURRENT_WEEK-wn(w))*7;
     var o=offsets[i%offsets.length];
     var data={};
-    NDAY_ALL_DAYS.forEach(function(d){data[d]=d<=days?Math.max(0,baseObj[d]+o):null;});
+    NDAY_ALL_DAYS.forEach(function(d){
+      if(d===0){data[d]=100;}
+      else{data[d]=d<=days?Math.max(0,baseObj[d]+o):null;}
+    });
     return{w:w,data:data};
   });
 }
@@ -518,6 +521,7 @@ function makeNdayTbl(id,cohorts){
     var html='<td class="wk-label">'+wLabel(r.w)+'<span class="wk-range">2025-'+r.w+'</span></td>';
     NDAY_SELECTED.forEach(function(d){
       var v=r.data[d];
+      if(d===0){html+='<td style="background:rgba(255,255,255,0.04);color:#6b6b80;font-size:11px">100%</td>';return;}
       if(v===null||v===undefined){html+='<td style="color:#3a3a4a">—</td>';return;}
       var c=ndayCol(v);html+='<td style="background:'+c.bg+';color:'+c.tx+';font-weight:600">'+v+'%</td>';
     });
@@ -557,7 +561,7 @@ function makeSnapshotTbl(id,cohorts,cols){
   cohorts.forEach(function(r){
     var tr=document.createElement('tr');
     var html='<td class="wk-label">'+wLabel(r.w)+'<span class="wk-range">2025-'+r.w+'</span></td>';
-    html+='<td style="color:#8b8b9e;font-size:11px;font-weight:500;text-align:center">'+r.size.toLocaleString()+'명</td>';
+    html+='<td style="color:#8b8b9e;font-size:11px;font-weight:500">'+r.size.toLocaleString()+'명</td>';
     r.vals.forEach(function(v){
       if(v===null||v===undefined){html+='<td style="color:#3a3a4a">—</td>';return;}
       var c=ccol(v);html+='<td style="background:'+c.bg+';color:'+c.tx+';font-weight:600">'+v+'%</td>';
