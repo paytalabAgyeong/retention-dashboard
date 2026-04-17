@@ -174,7 +174,7 @@ body{background:#0a0a0f;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Se
   <!-- 전체 코호트 리텐션 매트릭스 -->
   <div class="card">
     <div class="ct">전체 코호트 리텐션 매트릭스</div>
-    <div class="cs" id="matrix-sub">첫 구매주 기준 · 최근 10주 코호트</div>
+    <div class="cs" id="matrix-sub">첫 구매주 기준 · 최근 13주 코호트</div>
     <div class="sub-tabs" id="stabs-matrix">
       <button class="stab active" onclick="swSub('matrix','order',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>주문 리텐션</button>
       <button class="stab" onclick="swSub('matrix','visit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>방문 리텐션</button>
@@ -283,8 +283,8 @@ var WEEK_RANGE={
   'W21':'5/19~5/25','W22':'5/26~6/1','W23':'6/2~6/8','W24':'6/9~6/15',
   'W25':'6/16~6/22'
 };
-// 전체 코호트 주차 풀 (16주: W10~W25)
-var ALL_WEEKS=['W10','W11','W12','W13','W14','W15','W16','W17','W18','W19','W20','W21','W22','W23','W24','W25'];
+// 전체 코호트 주차 풀 (25주: W01~W25)
+var ALL_WEEKS=['W01','W02','W03','W04','W05','W06','W07','W08','W09','W10','W11','W12','W13','W14','W15','W16','W17','W18','W19','W20','W21','W22','W23','W24','W25'];
 
 function wn(w){return parseInt(w.substring(1));}
 function wRange(w){return WEEK_RANGE[w]||'';}
@@ -406,7 +406,7 @@ var SEG_SNAPSHOT_DAY={
 var PERIOD={
   3:{
     badge:'2025년 4–6월',
-    sliceCount:6,
+    sliceCount:13,
     mosuVal:'58,120명',mosuSub:'이전 3개월 54,800명 / <span class="up">▲ +6.1%</span>',
     cycleVal:'18.4일',cycleSub:'이전 3개월 대비 <span class="up">▲ 0.5일 단축</span>',
     popMonths:['4월','5월','6월'],
@@ -414,7 +414,7 @@ var PERIOD={
   },
   6:{
     badge:'2025년 1–6월',
-    sliceCount:10,
+    sliceCount:16,
     mosuVal:'112,060명',mosuSub:'이전 6개월 98,240명 / <span class="up">▲ +14.1%</span>',
     cycleVal:'19.1일',cycleSub:'이전 6개월 대비 <span class="up">▲ 0.8일 단축</span>',
     popMonths:['1월','2월','3월','4월','5월','6월'],
@@ -422,7 +422,7 @@ var PERIOD={
   },
   12:{
     badge:'2024년 7월–2025년 6월',
-    sliceCount:16,
+    sliceCount:25,
     mosuVal:'112,060명',mosuSub:'이전 12개월 81,400명 / <span class="up">▲ +37.7%</span>',
     cycleVal:'20.5일',cycleSub:'이전 12개월 대비 <span class="up">▲ 1.4일 단축</span>',
     popMonths:['7월','8월','9월','10월','11월','12월','1월','2월','3월','4월','5월','6월'],
