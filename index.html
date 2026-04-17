@@ -200,10 +200,6 @@ body{background:#0a0a0f;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Se
       <button class="stab active" onclick="swSub('nday','order',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>주문 리텐션</button>
       <button class="stab" onclick="swSub('nday','visit',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>방문 리텐션</button>
     </div>
-    <div class="nday-selector">
-      <span class="nday-selector-label">조회 Day 설정</span>
-      <div class="nday-options" id="nday-options"></div>
-    </div>
     <div id="nday-order" class="stab-content active">
       <div class="cohort-wrap" id="tbl-nday"></div>
     </div>
@@ -272,7 +268,7 @@ var cohortSeg='act',cohortType='week',cohortMetric='order';
 var tSec='#6b6b80',grid='rgba(255,255,255,0.05)';
 var ELAPSED_WEEKS=['W1','W2','W3','W4','W5','W6'];
 var NDAY_ALL_DAYS=[1,2,3,4,5,6,7,10,14,21,30];
-var NDAY_SELECTED=[1,3,5,7,14];
+var NDAY_SELECTED=[1,2,3,4,5,6,7,10,14,21,30];
 var CURRENT_WEEK=26; // 현재 2025-W26 기준
 
 /* ============================================================
@@ -679,26 +675,9 @@ function drawSubContent(group,mode){
 /* ============================================================
    N-DAY SELECTOR
    ============================================================ */
-function toggleNday(day,el){
-  var idx=NDAY_SELECTED.indexOf(day);
-  if(idx>-1){if(NDAY_SELECTED.length<=1)return;NDAY_SELECTED.splice(idx,1);el.classList.remove('active');}
-  else{NDAY_SELECTED.push(day);NDAY_SELECTED.sort(function(a,b){return a-b;});el.classList.add('active');}
-  renderNdayBoth();
-}
 function renderNdayBoth(){
-  var mode=currentSubMode['nday']||'order';
   makeNdayTbl('tbl-nday',getNday('order'));
   makeNdayTbl('tbl-nday-visit',getNday('visit'));
-}
-function buildNdayOpts(){
-  var opts=document.getElementById('nday-options');
-  if(opts.children.length>0)return;
-  NDAY_ALL_DAYS.forEach(function(d){
-    var btn=document.createElement('button');btn.className='nday-opt';btn.textContent='D'+d;
-    if(NDAY_SELECTED.indexOf(d)>-1)btn.classList.add('active');
-    btn.onclick=function(){toggleNday(d,btn);};
-    opts.appendChild(btn);
-  });
 }
 
 /* ============================================================
@@ -783,7 +762,6 @@ function draw(tab){
     makeTbl('tbl-all-visit',getCohorts('all-visit'),ELAPSED_WEEKS);
 
     // N-Day
-    buildNdayOpts();
     makeNdayTbl('tbl-nday',getNday('order'));
     makeNdayTbl('tbl-nday-visit',getNday('visit'));
 
@@ -821,14 +799,14 @@ function draw(tab){
    ============================================================ */
 // 리텐션 커브용 일자 포인트 (기간별)
 var CURVE_DAYS={
-  3:[1,2,3,4,5,6,7,10,14,21,30,45,60,90],
-  6:[1,2,3,5,7,10,14,21,30,45,60,90,120,150,180],
-  12:[1,3,5,7,14,21,30,45,60,90,120,150,180,240,300,365]
+  3:[0,1,2,3,4,5,6,7,10,14,21,30,45,60,90],
+  6:[0,1,2,3,5,7,10,14,21,30,45,60,90,120,150,180],
+  12:[0,1,3,5,7,14,21,30,45,60,90,120,150,180,240,300,365]
 };
-// 기간별 기준 리텐션 베이스 (order)
+// D0=100%에서 시작, 초반 급락 → 후반 완만 (뒤집힌 J커브)
 var CURVE_BASE={
-  order:{1:64,2:60,3:57,4:55,5:53,6:50,7:47,10:42,14:37,21:32,30:27,45:22,60:19,90:16,120:14,150:13,180:12,240:11,300:10,365:9},
-  visit:{1:77,2:73,3:70,4:68,5:66,6:64,7:61,10:56,14:51,21:45,30:40,45:35,60:32,90:28,120:26,150:25,180:24,240:23,300:22,365:21}
+  order:{0:100,1:42,2:35,3:31,4:28,5:26,6:25,7:24,10:22,14:20,21:18,30:16,45:14,60:13,90:12,120:11,150:11,180:10,240:10,300:9,365:9},
+  visit:{0:100,1:55,2:48,3:44,4:41,5:39,6:38,7:36,10:33,14:30,21:27,30:25,45:23,60:21,90:20,120:19,150:18,180:18,240:17,300:17,365:16}
 };
 
 function avgByDay(mode,days){
@@ -899,7 +877,7 @@ function buildRetentionCurve(){
         y:{
           grid:{color:grid},
           ticks:{color:tSec,font:{size:11,family:'Inter'},callback:function(v){return v+'%'}},
-          min:0,max:80
+          min:0,max:100
         }
       }
     }
